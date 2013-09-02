@@ -11,27 +11,34 @@ config.read(xdg.BaseDirectory.xdg_config_home + '/pywer/pywer.ini')
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
             description='A simple AUR helper in python.',
-            epilog='See the config file in $PREFIX/share/doc/pywer')
-
-    parser.add_argument('-s', '--search',
+            epilog='See the config file in $PREFIX/share/doc/pywer. \
+                   Copy it to {} and edit it for use.'.format(xdg.BaseDirectory.xdg_config_home),
+                   )
+    # Operations
+    # TODO: Find some way to only allow a single operation
+    operations = parser.add_argument_group('Operations')
+    operations.add_argument('-s', '--search',
                         help='Search for this package',
                         metavar='term')
-    parser.add_argument('-i', '--info',
+    operations.add_argument('-i', '--info',
                         help='Get info for this package',
                         metavar='pkg')
-    parser.add_argument('-m', '--msearch',
+    operations.add_argument('-m', '--msearch',
                         help='Search for this maintainers packages',
                         metavar='maintainer')
-    parser.add_argument('-u', '--update',
+    operations.add_argument('-u', '--update',
                         help='Print package updates for the system',
                         action='store_true')
-    parser.add_argument('-d', '--download',
+    operations.add_argument('-d', '--download',
                         help='Download the package',
                         metavar='pkg')
-    parser.add_argument('-q', '--quiet',
+
+    # Options
+    options = parser.add_argument_group('Options')
+    options.add_argument('-q', '--quiet',
                         help='Be quieter',
                         action='store_true')
-    parser.add_argument('--ignorerepo',
+    options.add_argument('--ignorerepo',
                         help='Specify a repo to ignore',
                         metavar='repo')
     args = parser.parse_args()
@@ -57,4 +64,5 @@ if __name__ == '__main__':
             libaur.printer.pretty_print_updpkgs(baseurl=_baseurl)
     elif args.download:
         libaur.printer.download_pkgs([args.download], VERBOSE, baseurl=_baseurl)
-
+    else:
+        print('error: No operation specified. (use -h for help)')
