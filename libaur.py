@@ -58,7 +58,7 @@ class InfoPkg(SearchPkg):
 
 class GetPkgs(InfoPkg):
     '''Downloads and transparently extracts to a specified path.'''
-    def download_package(self, extpath):
+    def download_package(self, extpath, verbose=False):
         '''
         Arguments:
         extpath -- Where the files should be extracted. Will create something
@@ -67,9 +67,13 @@ class GetPkgs(InfoPkg):
                         extpath/package/package.install
                     and so forth
         '''
-        for i in range(len(self.get_results())):
-            a = requests.get(self.baseurl +
-                self.get_results()[i]['URLPath'], stream=True)
+        json_results = self.get_results()
+        for i in range(len(json_results)):
+            if verbose:
+                print(':: Downloading {} {}...'.format(json_results[i]['Name'],
+                    json_results[i]['Version']))
+            a = requests.get('{}{}'.format(self.baseurl,
+                json_results[i]['URLPath']), stream=True)
             with tarfile.open(fileobj=a.raw, mode='r|*') as tar:
                 tar.extractall(path=extpath)
 
