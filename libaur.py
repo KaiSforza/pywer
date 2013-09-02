@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+'''
+A simple library for the AUR.
+
+Has classes for searching, inspecting, and checking for updates.
+
+Author: William Giokas <1007380@gmail.com>
+'''
+
 import subprocess
 import requests
 import json
@@ -6,6 +14,7 @@ import re
 import distutils.version
 
 class SearchPkg(object):
+    '''Search for packages on the AUR.'''
     def __init__(self, term, req_type = 'search',
             baseurl='https://aur.archlinux.org/rpc.php'):
         '''
@@ -28,6 +37,7 @@ class SearchPkg(object):
         return self.results.json()['results']
 
 class InfoPkg(SearchPkg):
+    '''For introspcting packages on the AUR. Can work on multiple packages.'''
     def __init__(self, pkgs, baseurl='https://aur.archlinux.org/rpc.php'):
         '''
         Arguments:
@@ -44,6 +54,8 @@ class InfoPkg(SearchPkg):
             self.payload['arg[{}]'.format(each)] = each
 
 class GetPkgs(InfoPkg):
+    '''Download packages from the AUR.'''
+    #TODO: Actually do this.
     def download_archive(self):
         for i in len(self.get_results()):
             test_file = open('/home/wgiokas/tmp/{}.tar.gz'.format(self.get_results()[i]['Name']), mode='rb')
