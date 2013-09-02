@@ -42,8 +42,8 @@ def pretty_print_updpkgs(other_repos=[]):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-            description='A simple AUR helper in python',
-            epilog='Author: William Giokas <1007380@gmail.com>')
+            description='A simple AUR helper in python.',
+            epilog='See the config file in $PREFIX/share/doc/pywer')
 
     parser.add_argument('-s', '--search',
                         help='Search for this package',
