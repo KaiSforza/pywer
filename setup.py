@@ -2,10 +2,9 @@
 
 from setuptools import setup
 import sys
-import libaur
 
 setup(name='pywer',
-      version=libaur.__version__,
+      version=0.1,
       description='A simple python-based AUR helper',
       url='http://git.kaictl.net/wgiokas/pywer.git',
       author='William Giokas',
@@ -15,6 +14,6 @@ setup(name='pywer',
       scripts=['pywer'],
       # Config scripts are placed in $PREFIX/share/doc/pywer
       data_files=[('share/doc/pywer', ['pywer.ini'])],
-      install_requires=["requests",
-                        "pyxdg"]
+      install_requires=['requests',
+                        'pyxdg']
       )
