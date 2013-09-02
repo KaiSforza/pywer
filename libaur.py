@@ -6,12 +6,15 @@ import re
 import distutils.version
 
 class SearchPkg(object):
-    def __init__(self, term, req_type = 'search', baseurl='https://aur.archlinux.org'):
+    def __init__(self, term, req_type = 'search',
+            baseurl='https://aur.archlinux.org/rpc.php'):
         '''
         Arguments:
         term -- tearm to search for (str)
         req_type='search' -- Type of search. One of 'search' or 'msearch'.
                     'info' can also be used, but InfoPkg should be preferred.
+        baseurl='https://aur.archlinux.org/rpc.php' -- A string pointing to the
+                    rpc interface for an AUR site.
         '''
         self.baseurl = baseurl
         self.payload = { 'type': req_type }
@@ -25,10 +28,12 @@ class SearchPkg(object):
         return self.results.json()['results']
 
 class InfoPkg(SearchPkg):
-    def __init__(self, pkgs, baseurl='https://aur.archlinux.org'):
+    def __init__(self, pkgs, baseurl='https://aur.archlinux.org/rpc.php'):
         '''
         Arguments:
         pkgs -- A list of packages to get info for (list)
+        baseurl='https://aur.archlinux.org/rpc.php' -- A string pointing to the
+                    rpc interface for an AUR site.
         '''
         self.baseurl = baseurl
         if not isinstance(pkgs, list):
@@ -45,15 +50,31 @@ class GetPkgs(InfoPkg):
             requests.get(self.baseurl + self.get_results()[i]['URLPath'])
 
 class UpdatedPkgs():
-    def __init__(self, other_repos=[], baseurl='https://aur.archlinux.org'):
+    '''
+    This class is used for grabbing lists of updated packages from the AUR
+    specified by 'baseurl'.
+    '''
+    def __init__(self, other_repos=[],
+            baseurl='https://aur.archlinux.org/rpc.php'):
+        '''
+        Arguments:
+        other_repos=[] -- A list of repos to ignore becuase they contain AUR
+                    packages. Defaults to an empty list, ignoring no repos.
+        baseurl='https://aur.archlinux.org/rpc.php' -- A string pointing to the
+                    rpc interface for an AUR site.
+        '''
         self.baseurl = baseurl
+        self.other_repos = other_repos
+
+    def __init_local(self):
+        '''
+        Initializes the lists of packages and dictionaries for local items.
+        See __init_remote__() for pulling package lists from an AUR.
+        '''
         # Create a list ['pkgname pkgver']
-        aurlist = subprocess.check_output(['/usr/bin/pacman', '-Q', '-m'],
-                universal_newlines=True).splitlines()
+        self.aurlist = self.list_unofficial_pkgs()
         # Append packages from repo to aurlist
-        for aur_repos in other_repos:
-            aurlist.extend(subprocess.check_output([ '/usr/bin/paclist', aur_repos],
-                universal_newlines=True).splitlines())
+        self.aurlist.extend(self.list_ignored_repo_pkgs())
         #aurlist.append('pacman-git 4.1.2.r116.gfeb2087-1')
         # Initialize a list that will be converted to a dictionary later
         self.aurpkgs = {}
@@ -61,12 +82,33 @@ class UpdatedPkgs():
         #       {'pkg1':'ver1',
         #        'pkg2':'ver2',
         #        ...}
-        for pkg_and_ver in aurlist:
+        for pkg_and_ver in self.aurlist:
             name, version = re.split(' ', pkg_and_ver)
             self.aurpkgs[name] = version
         # Create a list of package names from the keys in the aurpkgs dict:
         #       ['pkg1', 'pkg2', ...]
         self.pkgnames = list(self.aurpkgs.keys())
+
+    def __init_remote(self):
+        '''
+        get json result from a multiinfo request
+        '''
+        # Requires execution of __init_local__()
+        self.__init_local()
+        self.all_pkg_info = InfoPkg(self.pkgnames, self.baseurl).get_results()
+
+    def list_unofficial_pkgs(self):
+        '''list packages with 'pacman -Qm' '''
+        return subprocess.check_output(['/usr/bin/pacman', '-Q', '-m'],
+                universal_newlines=True).splitlines()
+
+    def list_ignored_repo_pkgs(self):
+        '''list packages in the other_repos list'''
+        ignlist = []
+        for aur_repos in self.other_repos:
+            ignlist.extend(subprocess.check_output([ '/usr/bin/paclist', aur_repos],
+                universal_newlines=True).splitlines())
+        return ignlist
 
     def get_upd_pkgs(self):
         '''
@@ -74,12 +116,11 @@ class UpdatedPkgs():
         Returns: dictionary:
             {pkgname:{'oldver':installedversion, 'newver':aur_version}, ...}
         '''
-        # get json result from a multiinfo request
-        all_pkg_info = InfoPkg(self.pkgnames, self.baseurl).get_results()
+        self.__init_remote()
         # Initialize the return list
-        add_to_update = {} 
+        add_to_update = {}
         # We want to go through each package dictionary returned by InfoPkg
-        for pkginfo in all_pkg_info:
+        for pkginfo in self.all_pkg_info:
             # Get the pkgname and pkgver from each package
             pkgname = pkginfo['Name']
             pkgver  = pkginfo['Version']

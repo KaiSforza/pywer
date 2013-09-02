@@ -39,6 +39,6 @@ def pretty_print_updpkgs(other_repos=[]):
 
 if __name__ == '__main__':
     #pretty_print_simple_info(['linux-mainline', 'git-git'])
-    pretty_print_search('git-git')
+#    pretty_print_search('git-git')
     pretty_print_updpkgs(other_repos=re.split(',',
         config['Repos']['IgnoreRepo']))
