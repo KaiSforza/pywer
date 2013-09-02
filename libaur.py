@@ -16,13 +16,13 @@ import distutils.version
 class SearchPkg(object):
     '''Search for packages on the AUR.'''
     def __init__(self, term, req_type = 'search',
-            baseurl='https://aur.archlinux.org/rpc.php'):
+            baseurl='https://aur.archlinux.org'):
         '''
         Arguments:
         term -- tearm to search for (str)
         req_type='search' -- Type of search. One of 'search' or 'msearch'.
                     'info' can also be used, but InfoPkg should be preferred.
-        baseurl='https://aur.archlinux.org/rpc.php' -- A string pointing to the
+        baseurl='https://aur.archlinux.org' -- A string pointing to the
                     rpc interface for an AUR site.
         '''
         self.baseurl = baseurl
@@ -33,16 +33,16 @@ class SearchPkg(object):
         '''
         Returns: json formatted output
         '''
-        self.results = requests.get(self.baseurl, params=self.payload)
+        self.results = requests.get(self.baseurl + '/rpc.php', params=self.payload)
         return self.results.json()['results']
 
 class InfoPkg(SearchPkg):
     '''For introspcting packages on the AUR. Can work on multiple packages.'''
-    def __init__(self, pkgs, baseurl='https://aur.archlinux.org/rpc.php'):
+    def __init__(self, pkgs, baseurl='https://aur.archlinux.org'):
         '''
         Arguments:
         pkgs -- A list of packages to get info for (list)
-        baseurl='https://aur.archlinux.org/rpc.php' -- A string pointing to the
+        baseurl='https://aur.archlinux.org' -- A string pointing to the
                     rpc interface for an AUR site.
         '''
         self.baseurl = baseurl
@@ -57,9 +57,12 @@ class GetPkgs(InfoPkg):
     '''Download packages from the AUR.'''
     #TODO: Actually do this.
     def download_archive(self):
-        for i in len(self.get_results()):
-            test_file = open('/home/wgiokas/tmp/{}.tar.gz'.format(self.get_results()[i]['Name']), mode='rb')
-            requests.get(self.baseurl + self.get_results()[i]['URLPath'])
+        for i in range(len(self.get_results())):
+            with open('/home/wgiokas/tmp/{}.tar.gz'.format(self.get_results()[i]['Name']),
+                    mode='wb') as testfile:
+                a = requests.get(self.baseurl +
+                    self.get_results()[i]['URLPath']).content
+                testfile.write(a)
 
 class UpdatedPkgs():
     '''
@@ -67,12 +70,12 @@ class UpdatedPkgs():
     specified by 'baseurl'.
     '''
     def __init__(self, other_repos=[],
-            baseurl='https://aur.archlinux.org/rpc.php'):
+            baseurl='https://aur.archlinux.org'):
         '''
         Arguments:
         other_repos=[] -- A list of repos to ignore becuase they contain AUR
                     packages. Defaults to an empty list, ignoring no repos.
-        baseurl='https://aur.archlinux.org/rpc.php' -- A string pointing to the
+        baseurl='https://aur.archlinux.org' -- A string pointing to the
                     rpc interface for an AUR site.
         '''
         self.baseurl = baseurl
@@ -107,7 +110,7 @@ class UpdatedPkgs():
         '''
         # Requires execution of __init_local__()
         self.__init_local()
-        self.all_pkg_info = InfoPkg(self.pkgnames, self.baseurl).get_results()
+        self.all_pkg_info = InfoPkg(self.pkgnames, baseurl=self.baseurl).get_results()
 
     def list_unofficial_pkgs(self):
         '''list packages with 'pacman -Qm' '''
