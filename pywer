@@ -72,6 +72,9 @@ if __name__ == '__main__':
     parser.add_argument('-q', '--quiet',
                         help='Be quieter',
                         action='store_true')
+    parser.add_argument('--ignorerepo',
+                        help='Specify a repo to ignore',
+                        metavar='repo')
     args = parser.parse_args()
 
     VERBOSE=True
@@ -85,7 +88,10 @@ if __name__ == '__main__':
     elif args.info:
         pretty_print_simple_info([args.info])
     elif args.update:
-        pretty_print_updpkgs()
+        if args.ignorerepo:
+            pretty_print_updpkgs(other_repos=[args.ignorerepo])
+        else:
+            pretty_print_updpkgs()
     elif args.download:
         download_pkgs([args.download], VERBOSE)
 

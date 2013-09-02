@@ -19,14 +19,14 @@ pywer
   --force
   --format=
   --ignore=
-  --ignorerepo[=]
+  DONE--ignorerepo[=]
   --listdelim
   --no-ignore-ood
   --ignore-ood
   --sort
   --rsort
   --from-pkgbuild
-  --quiet
+  --quiet (partially done)
   --target
   --threads (needed??)
   --timeout (needed??)
