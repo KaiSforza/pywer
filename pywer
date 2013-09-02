@@ -39,6 +39,13 @@ def pretty_print_updpkgs(other_repos=[]):
         print('{} {} => {}'.format(pkgs, upddict[pkgs]['oldver'],
             upddict[pkgs]['newver']))
 
+def download_pkgs(list_of_pkgs):
+    if not isinstance(list_of_pkgs, list):
+        raise TypeError('Must be a list')
+    print('downloading packages...')
+    a = libaur.GetPkgs(list_of_pkgs)
+    a.download_package(config['Filesystem']['DownloadPath'])
+    print('Finished downloading packages.')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -57,6 +64,9 @@ if __name__ == '__main__':
     parser.add_argument('-u', '--update',
                         help='Print package updates for the system',
                         action='store_true')
+    parser.add_argument('-d', '--download',
+                        help='Download the package',
+                        metavar='pkg')
     args = parser.parse_args()
 
     if args.search:
@@ -67,4 +77,6 @@ if __name__ == '__main__':
         pretty_print_simple_info([args.info])
     elif args.update:
         pretty_print_updpkgs()
+    elif args.download:
+        download_pkgs([args.download])
 
