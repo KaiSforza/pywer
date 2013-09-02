@@ -1,53 +1,12 @@
 #!/usr/bin/env python3
-import libaur
+import libaur.aur as libaur
+import libaur.printer
 import configparser
 import xdg.BaseDirectory
-import re
 import argparse
 
 config = configparser.ConfigParser()
 config.read(xdg.BaseDirectory.xdg_config_home + '/pywer/pywer.ini')
-
-def pretty_print_search(package, stype='search'):
-    json_output = libaur.SearchPkg(package, baseurl=config['AUR']['BaseUrl'],
-            req_type=stype).get_results()
-    for i in range(len(json_output)):
-        name = json_output[i]['Name']
-        version = json_output[i]['Version']
-        if json_output[i]['OutOfDate'] > 0:
-            ood = '<!> '
-        else:
-            ood = ''
-        numvotes = json_output[i]['NumVotes']
-        description = json_output[i]['Description']
-
-        print('aur/{} {} {}({})\n    {}'.format(name, version, ood, numvotes, description))
-
-def pretty_print_simple_info(packages):
-    json_output = libaur.InfoPkg(packages, baseurl=config['AUR']['BaseUrl']).get_results()
-    for i in range(len(json_output)):
-        for field in ['Name', 'Maintainer', 'Version', 'URL', 'License']:
-            print('{:<12}: {}'.format(field, json_output[i][field]))
-        print()
-
-def pretty_print_updpkgs(other_repos=[]):
-    if not other_repos:
-        other_repos = (re.split(',', config['Repos']['IgnoreRepo']))
-    a = libaur.UpdatedPkgs(other_repos, baseurl=config['AUR']['BaseUrl'])
-    upddict = a.get_upd_pkgs()
-    for pkgs in sorted(upddict.keys()):
-        print('{} {} => {}'.format(pkgs, upddict[pkgs]['oldver'],
-            upddict[pkgs]['newver']))
-
-def download_pkgs(list_of_pkgs, dl_verbose):
-    if not isinstance(list_of_pkgs, list):
-        raise TypeError('Must be a list')
-    if dl_verbose:
-        print('downloading packages...')
-    a = libaur.GetPkgs(list_of_pkgs)
-    a.download_package(config['Filesystem']['DownloadPath'], verbose=dl_verbose)
-    if dl_verbose:
-        print('Finished downloading packages.')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -81,17 +40,21 @@ if __name__ == '__main__':
     if args.quiet:
         VERBOSE=False
 
+    _baseurl = config['AUR']['BaseUrl']
+
     if args.search:
-        pretty_print_search(args.search)
+        libaur.printer.pretty_print_search(args.search, baseurl=_baseurl)
     elif args.msearch:
-        pretty_print_search(args.msearch, stype='msearch')
+        libaur.printer.pretty_print_search(args.msearch, stype='msearch',
+                baseurl=_baseurl)
     elif args.info:
-        pretty_print_simple_info([args.info])
+        libaur.printer.pretty_print_simple_info([args.info], baseurl=_baseurl)
     elif args.update:
         if args.ignorerepo:
-            pretty_print_updpkgs(other_repos=[args.ignorerepo])
+            libaur.printer.pretty_print_updpkgs(other_repos=[args.ignorerepo],
+                    baseurl=_baseurl)
         else:
-            pretty_print_updpkgs()
+            libaur.printer.pretty_print_updpkgs(baseurl=_baseurl)
     elif args.download:
-        download_pkgs([args.download], VERBOSE)
+        libaur.printer.download_pkgs([args.download], VERBOSE, baseurl=_baseurl)
 

@@ -14,7 +14,7 @@ import re
 import distutils.version
 import tarfile
 
-__version__ = '0.1'
+from .__init__ import __version__
 
 class SearchPkg(object):
     '''Search for packages on the AUR.'''
