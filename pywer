@@ -63,6 +63,7 @@ if __name__ == '__main__':
         else:
             libaur.printer.pretty_print_updpkgs(baseurl=_baseurl)
     elif args.download:
-        libaur.printer.download_pkgs([args.download], VERBOSE, baseurl=_baseurl)
+        libaur.printer.download_pkgs([args.download], verbose=VERBOSE,
+                baseurl=_baseurl)
     else:
         print('error: No operation specified. (use -h for help)')
