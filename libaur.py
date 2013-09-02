@@ -55,14 +55,14 @@ class InfoPkg(SearchPkg):
             self.payload['arg[{}]'.format(each)] = each
 
 class GetPkgs(InfoPkg):
-    #TODO: don't just allow users to download tarballs, allow them to
-    #      transparently extract them to a directory.
+    '''Downloads and transparently extracts to a specified path.'''
     def download_package(self, extpath):
         '''
         Arguments:
         extpath -- Where the files should be extracted. Will create something
                     like::
                         extpath/package/PKGBUILD
+                        extpath/package/package.install
                     and so forth
         '''
         for i in range(len(self.get_results())):
