@@ -1,0 +1,46 @@
+Release notes
+
+I mentioned the new features, and I will be working on this more. Here's
+the things I still need to add:
+
+pywer
+- option flags for overriding certain things such as ignored repos.
+- look through the cower man page. We have a lot of options to add, some
+  of which may not be easy. So far I've only gotten the main operations
+  in there. (see cower.1 for more info)
+  DONE--download
+  DONE--info
+  DONE--msearch
+  DONE--search
+  DONE--update
+  --brief
+  --color
+  --debut
+  --force
+  --format=
+  --ignore=
+  --ignorerepo[=]
+  --listdelim
+  --no-ignore-ood
+  --ignore-ood
+  --sort
+  --rsort
+  --from-pkgbuild
+  --quiet
+  --target
+  --threads (needed??)
+  --timeout (needed??)
+  --verbose
+  --version
+
+libaur
+- see 'Docs'
+- simple PKGBUILD parsing for *depends, conflicts, provides, etc.
+
+Docs
+- Better documentation. Possibly a separate docs/ tree for building with
+  sphinx or something with more info on the library and its use
+
+Aesthetics
+- Colors
+- Flags for colors (see 'pywer')
