@@ -12,6 +12,7 @@ import requests
 import json
 import re
 import distutils.version
+import tarfile
 
 class SearchPkg(object):
     '''Search for packages on the AUR.'''
@@ -54,15 +55,21 @@ class InfoPkg(SearchPkg):
             self.payload['arg[{}]'.format(each)] = each
 
 class GetPkgs(InfoPkg):
-    '''Download packages from the AUR.'''
-    #TODO: Actually do this.
-    def download_archive(self):
+    #TODO: don't just allow users to download tarballs, allow them to
+    #      transparently extract them to a directory.
+    def download_package(self, extpath):
+        '''
+        Arguments:
+        extpath -- Where the files should be extracted. Will create something
+                    like::
+                        extpath/package/PKGBUILD
+                    and so forth
+        '''
         for i in range(len(self.get_results())):
-            with open('/home/wgiokas/tmp/{}.tar.gz'.format(self.get_results()[i]['Name']),
-                    mode='wb') as testfile:
-                a = requests.get(self.baseurl +
-                    self.get_results()[i]['URLPath']).content
-                testfile.write(a)
+            a = requests.get(self.baseurl +
+                self.get_results()[i]['URLPath'], stream=True)
+            with tarfile.open(fileobj=a.raw, mode='r|*') as tar:
+                tar.extractall(path=extpath)
 
 class UpdatedPkgs():
     '''
