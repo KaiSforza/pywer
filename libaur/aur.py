@@ -37,7 +37,8 @@ class SearchPkg(object):
         Returns: json formatted output
         '''
         self.results = requests.get(self.baseurl + '/rpc.php', params=self.payload)
-        return self.results.json()['results']
+        self.json_output = self.results.json()['results']
+        return self.json_output
 
 class InfoPkg(SearchPkg):
     '''For introspcting packages on the AUR. Can work on multiple packages.'''
@@ -58,7 +59,16 @@ class InfoPkg(SearchPkg):
 
 class GetPkgs(InfoPkg):
     '''Downloads and transparently extracts to a specified path.'''
-    def download_package(self, extpath, verbose=False):
+    def get_stream(self, num):
+        '''
+        Arguments:
+        num -- number of packages (generally generated from
+               len(self.json_output)
+        '''
+        self.stream = requests.get('{}{}'.format(self.baseurl,
+                self.json_output[num]['URLPath']), stream=True)
+
+    def get_tarfile(self, extpath):
         '''
         Arguments:
         extpath -- Where the files should be extracted. Will create something
@@ -66,17 +76,9 @@ class GetPkgs(InfoPkg):
                         extpath/package/PKGBUILD
                         extpath/package/package.install
                     and so forth
-        verbose -- Whether to be more verbose
         '''
-        json_results = self.get_results()
-        for i in range(len(json_results)):
-            if verbose:
-                print(':: Downloading {} {}...'.format(json_results[i]['Name'],
-                    json_results[i]['Version']))
-            a = requests.get('{}{}'.format(self.baseurl,
-                json_results[i]['URLPath']), stream=True)
-            with tarfile.open(fileobj=a.raw, mode='r|*') as tar:
-                tar.extractall(path=extpath)
+        with tarfile.open(fileobj=self.stream.raw, mode='r|*') as tar:
+            tar.extractall(path=extpath)
 
 class UpdatedPkgs():
     '''

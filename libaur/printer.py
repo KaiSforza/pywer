@@ -74,8 +74,14 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=False, baseurl=None):
         raise TypeError('Must be a list')
     if dl_verbose:
         print('downloading packages...')
-    a = GetPkgs(list_of_pkgs, baseurl=baseurl)
-    a.download_package(dl_path, verbose=dl_verbose)
+    _a = GetPkgs(list_of_pkgs, baseurl=baseurl)
+    _a.get_results()
+    for i in range(len(_a.json_output)):
+        if dl_verbose:
+            print(':: Downloading {} {}...'.format(_a.json_output[i]['Name'],
+                _a.json_output[i]['Version']))
+        _a.get_stream(i)
+        _a.get_tarfile(dl_path)
     if dl_verbose:
         print('Finished downloading packages.')
 
