@@ -55,19 +55,18 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None):
                 repositories.
     baseurl (str) -- Where the AUR you are using is located
     '''
-    if not other_repos:
-        other_repos = (re.split(',', config['Repos']['IgnoreRepo']))
     a = UpdatedPkgs(other_repos, baseurl=baseurl)
     upddict = a.get_upd_pkgs()
     for pkgs in sorted(upddict.keys()):
         print('{} {} => {}'.format(pkgs, upddict[pkgs]['oldver'],
             upddict[pkgs]['newver']))
 
-def download_pkgs(list_of_pkgs, dl_verbose=False, baseurl=None):
+def download_pkgs(list_of_pkgs, dl_path, dl_verbose=False, baseurl=None):
     '''
     Download packages
 
     list_of_pkgs (list) -- a list of packages to download
+    dl_path (path) -- Location that packages are downloaded to
     dl_verbose (Bool) -- Whether to be verbose or not
     baseurl (str) -- Where the AUR you are using is located
     '''
@@ -75,9 +74,8 @@ def download_pkgs(list_of_pkgs, dl_verbose=False, baseurl=None):
         raise TypeError('Must be a list')
     if dl_verbose:
         print('downloading packages...')
-    a = GetPkgs(list_of_pkgs)
-    a.download_package(config['Filesystem']['DownloadPath'],
-        verbose=dl_verbose, baseurl=baseurl)
+    a = GetPkgs(list_of_pkgs, baseurl=baseurl)
+    a.download_package(dl_path, verbose=dl_verbose)
     if dl_verbose:
         print('Finished downloading packages.')
 

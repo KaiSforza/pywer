@@ -4,6 +4,7 @@ import libaur.printer
 import configparser
 import xdg.BaseDirectory
 import argparse
+from os import path
 
 config = configparser.ConfigParser()
 config.read(xdg.BaseDirectory.xdg_config_home + '/pywer/pywer.ini')
@@ -61,9 +62,12 @@ if __name__ == '__main__':
             libaur.printer.pretty_print_updpkgs(other_repos=[args.ignorerepo],
                     baseurl=_baseurl)
         else:
-            libaur.printer.pretty_print_updpkgs(baseurl=_baseurl)
+            _or = re.split(',', config['Repos']['IgnoreRepo'])
+            libaur.printer.pretty_print_updpkgs(other_repos=_or, baseurl=_baseurl)
     elif args.download:
-        libaur.printer.download_pkgs([args.download], verbose=VERBOSE,
+        dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
+        dl_path = path.expandvars(dl_path)
+        libaur.printer.download_pkgs([args.download], dl_path, dl_verbose=VERBOSE,
                 baseurl=_baseurl)
     else:
         print('error: No operation specified. (use -h for help)')
