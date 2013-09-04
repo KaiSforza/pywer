@@ -66,6 +66,7 @@ class GetPkgs(InfoPkg):
                         extpath/package/PKGBUILD
                         extpath/package/package.install
                     and so forth
+        verbose -- Whether to be more verbose
         '''
         json_results = self.get_results()
         for i in range(len(json_results)):
