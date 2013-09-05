@@ -34,7 +34,7 @@ CATEGORIES = {
         19:'kernels',
         }
 
-def pretty_print_search(package, stype='search', baseurl=None):
+def pretty_print_search(package, stype='search', baseurl=None, ood=True):
     '''
     Print out search results
 
@@ -46,18 +46,22 @@ def pretty_print_search(package, stype='search', baseurl=None):
     json_output = SearchPkg(package, baseurl=baseurl,
             req_type=stype).get_results()
     for i in range(len(json_output)):
+        if json_output[i]['OutOfDate'] == 0:
+            is_ood = ''
+        else:
+            if not ood:
+                continue
+            else:
+                is_ood = '<!> '
         name = json_output[i]['Name']
         version = json_output[i]['Version']
-        if json_output[i]['OutOfDate'] > 0:
-            ood = '<!> '
-        else:
-            ood = ''
         numvotes = json_output[i]['NumVotes']
         description = json_output[i]['Description']
 
-        print('aur/{} {} {}({})\n    {}'.format(name, version, ood, numvotes, description))
+        print('aur/{} {} {}({})\n    {}'.format(name, version, is_ood,
+            numvotes, description))
 
-def pretty_print_simple_info(packages, baseurl=None):
+def pretty_print_simple_info(packages, baseurl=None, ood=True):
     '''
     Get some simple info from an AUR
 
@@ -75,6 +79,25 @@ def pretty_print_simple_info(packages, baseurl=None):
 
     for i in range(len(json_output)):
         info_dict = {}
+        # Out of date or not
+        if json_output[i]['OutOfDate'] == 0:
+            info_dict['Out Of Date'] = '{:<15}: {}'.format('Out Of Date', 'No')
+        else:
+            if not ood:
+                continue
+            oodtime = time.ctime(json_output[i]['OutOfDate'] + time.timezone
+                    - tzdiff)
+            info_dict['Out Of Date'] = '{:<15}: {} (since {})'\
+                    .format('Out Of Date', 'Yes', oodtime)
+        # Format the date fields using 'time'
+        for field in ['FirstSubmitted', 'LastModified']:
+            if field == 'FirstSubmitted':
+                pretty_field = 'Submitted'
+            else:
+                pretty_field = 'Last Modified'
+            sec_time = json_output[i][field]
+            info_dict[pretty_field] = '{:<15}: {}'.format(pretty_field,
+                    time.ctime(json_output[i][field] + time.timezone - tzdiff))
         info_dict['repo'] = '{:<15}: {}'.format('Repository', 'aur')
         # If it's installed, add the [installed] flag to the name
         if call(['/usr/bin/pacman', '-Qq', json_output[i]['Name']],
@@ -87,26 +110,14 @@ def pretty_print_simple_info(packages, baseurl=None):
         # Get the easy, plain strings
         for field in ['Version', 'URL', 'License', 'Maintainer',
                 'Description']:
-            info_dict[field] = '{:<15}: {}'.format(field, json_output[i][field])
+            info_dict[field] = '{:<15}: {}'.format(field,
+                    json_output[i][field])
         info_dict['Votes'] = '{:<15}: {}'.format(field,
                 json_output[i]['NumVotes'])
-        # Format the date fields using 'time'
-        for field in ['FirstSubmitted', 'LastModified']:
-            if field == 'FirstSubmitted':
-                pretty_field = 'Submitted'
-            else:
-                pretty_field = 'Last Modified'
-            sec_time = json_output[i][field]
-            info_dict[pretty_field] = '{:<15}: {}'.format(pretty_field, 
-                    time.ctime(json_output[i][field] + time.timezone - tzdiff))
-        # Out of date or not
-        if json_output[i]['OutOfDate'] == 1:
-            info_dict['Out Of Date'] = '{:<15}: {}'.format('Out Of Date', 'Yes')
-        else:
-            info_dict['Out Of Date'] = '{:<15}: {}'.format('Out Of Date', 'No')
         info_dict['AUR Page'] = '{:<15}: {}/packages/{}'.format('AUR Page',
                 baseurl, json_output[i]['Name'])
-        info_dict['Category'] = '{:<15}: {}'.format('Category', CATEGORIES[json_output[i]['CategoryID']])
+        info_dict['Category'] = '{:<15}: {}'.format('Category',
+                CATEGORIES[json_output[i]['CategoryID']])
 
         for field in ['repo', 'Name', 'Version', 'URL', 'AUR Page', 'Category',
                 'License', 'Votes', 'Out Of Date', 'Maintainer', 'Submitted',
@@ -132,8 +143,8 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[]):
         print('{} {} => {}'.format(pkgs, upddict[pkgs]['oldver'],
             upddict[pkgs]['newver']))
 
-def download_pkgs(list_of_pkgs, dl_path, dl_verbose=False, baseurl=None,
-        dl_force=False):
+def download_pkgs(list_of_pkgs, dl_path, dl_verbose=True, baseurl=None,
+        dl_force=False, ood=True):
     '''
     Download packages
 
@@ -146,9 +157,13 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=False, baseurl=None,
     _a.get_results()
     for i in range(len(_a.json_output)):
         pkgname = _a.json_output[i]['Name']
+        if not _a.json_output[i]['OutOfDate'] == 0 and not ood:
+            print(':: no results for {}'.format(pkgname))
+            continue
         pkgver = _a.json_output[i]['Version']
         if path.exists('{}/{}'.format(dl_path, pkgname)) and not dl_force:
-            raise FileExists('{}/{} already exists. Use --force to overwrite'.format(dl_path, pkgname))
+            raise FileExists('{}/{} already exists. Use --force to overwrite'\
+                    .format(dl_path, pkgname))
         _a.get_stream(i)
         _a.get_tarfile(dl_path, force=dl_force)
         if dl_verbose:

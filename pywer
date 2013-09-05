@@ -54,6 +54,12 @@ if __name__ == '__main__':
     options.add_argument('-V', '--version',
                         help='Print version',
                         action='version', version='%(prog)s {}'.format(libaur.__version__))
+    options.add_argument('-o', '--ignore-ood',
+                        help='Ignore out of date packages',
+                        action='store_true')
+    options.add_argument('--no-ignore-ood',
+                        help='Do not ignore out of date packages',
+                        action='store_true')
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
@@ -69,6 +75,12 @@ if __name__ == '__main__':
                 .format(use_config)
         raise error.ConfigMissing(message)
 
+    SHOW_OOD=True
+    if args.ignore_ood:
+        SHOW_OOD=False
+    if args.no_ignore_ood:
+        SHOW_OOD=True
+
     VERBOSE=True
     if args.quiet:
         VERBOSE=False
@@ -80,12 +92,14 @@ if __name__ == '__main__':
     _baseurl = config['AUR']['BaseUrl']
 
     if args.search:
-        libaur.printer.pretty_print_search(args.search, baseurl=_baseurl)
+        libaur.printer.pretty_print_search(args.search, baseurl=_baseurl,
+                ood=SHOW_OOD)
     elif args.msearch:
         libaur.printer.pretty_print_search(args.msearch, stype='msearch',
-                baseurl=_baseurl)
+                baseurl=_baseurl, ood=SHOW_OOD)
     elif args.info:
-        libaur.printer.pretty_print_simple_info(args.info, baseurl=_baseurl)
+        libaur.printer.pretty_print_simple_info(args.info, baseurl=_baseurl,
+                ood=SHOW_OOD)
     elif args.download:
         if args.target:
             dl_path = path.expanduser(args.target)
@@ -93,7 +107,7 @@ if __name__ == '__main__':
             dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
         dl_path = path.expandvars(dl_path)
         libaur.printer.download_pkgs(args.download, dl_path, dl_verbose=VERBOSE,
-                baseurl=_baseurl, dl_force=FORCE)
+                baseurl=_baseurl, dl_force=FORCE, ood=SHOW_OOD)
     elif not args.update == '-DEFAULT':
         if args.ignorerepo:
             libaur.printer.pretty_print_updpkgs(other_repos=[args.ignorerepo],

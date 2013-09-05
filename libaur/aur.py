@@ -88,7 +88,7 @@ class UpdatedPkgs():
     specified by 'baseurl'.
     '''
     def __init__(self, other_repos=[], pkgs=[],
-            baseurl='https://aur.archlinux.org'):
+            baseurl='https://aur.archlinux.org', ood=True):
         '''
         Arguments:
         other_repos=[] -- A list of repos to ignore becuase they contain AUR
@@ -100,6 +100,7 @@ class UpdatedPkgs():
         self.baseurl = baseurl
         self.pkgs = pkgs
         self.other_repos = other_repos
+        self.ood = ood
 
     def __init_local(self):
         '''
@@ -163,6 +164,8 @@ class UpdatedPkgs():
         add_to_update = {}
         # We want to go through each package dictionary returned by InfoPkg
         for pkginfo in self.all_pkg_info:
+            if not self.ood and pkginfo['OutOfDate'] == 0:
+                continue
             # Get the pkgname and pkgver from each package
             pkgname = pkginfo['Name']
             pkgver  = pkginfo['Version']

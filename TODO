@@ -27,8 +27,8 @@ pywer
   * --ignore=
   * DONE--ignorerepo[=]
   * --listdelim
-  * --no-ignore-ood
-  * --ignore-ood
+  * DONE--no-ignore-ood
+  * DONE--ignore-ood
   * --sort
   * --rsort
   * --from-pkgbuild
