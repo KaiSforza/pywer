@@ -40,18 +40,12 @@ if __name__ == '__main__':
     options.add_argument('-q', '--quiet',
                         help='Be quieter',
                         action='store_true')
-    options.add_argument('--ignorerepo',
-                        help='Specify comma separated list of repos to ignore',
-                        metavar='repo')
     options.add_argument('-f', '--force',
                         help='overwrite existing files while downloading',
                         action='store_true')
     options.add_argument('--config',
                         help='Specify an alternate config',
                         metavar='file')
-    options.add_argument('-t', '--target',
-                        help='Specify an alternate download location',
-                        metavar='dir')
     options.add_argument('-V', '--version',
                         help='Print version',
                         action='version', version='%(prog)s {}'.format(libaur.__version__))
@@ -61,7 +55,14 @@ if __name__ == '__main__':
     options.add_argument('--no-ignore-ood',
                         help='Do not ignore out of date packages',
                         action='store_true')
-    options.add_argument('--baseurl',
+    config_opts = parser.add_argument_group('Configuration Options')
+    config_opts.add_argument('--ignorerepo',
+                        help='Specify comma separated list of repos to ignore',
+                        metavar='repo')
+    config_opts.add_argument('-t', '--target',
+                        help='Specify an alternate download location',
+                        metavar='dir')
+    config_opts.add_argument('--baseurl',
                         help='Set a custom baseurl to an AUR',
                         metavar='url')
     args = parser.parse_args()
