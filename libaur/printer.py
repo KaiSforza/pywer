@@ -142,8 +142,6 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=False, baseurl=None,
     '''
     if not isinstance(list_of_pkgs, list):
         raise TypeError('Must be a list')
-    if dl_verbose:
-        print('downloading packages...')
     _a = GetPkgs(list_of_pkgs, baseurl=baseurl)
     _a.get_results()
     for i in range(len(_a.json_output)):
@@ -151,10 +149,7 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=False, baseurl=None,
         pkgver = _a.json_output[i]['Version']
         if path.exists('{}/{}'.format(dl_path, pkgname)) and not dl_force:
             raise FileExists('{}/{} already exists. Use --force to overwrite'.format(dl_path, pkgname))
-        if dl_verbose:
-            print(':: Downloading {} {}...'.format(pkgname, pkgver))
         _a.get_stream(i)
         _a.get_tarfile(dl_path, force=dl_force)
-    if dl_verbose:
-        print('Finished downloading packages.')
-
+        if dl_verbose:
+            print(':: {0} downloaded to {2}'.format(pkgname, pkgver, dl_path))
