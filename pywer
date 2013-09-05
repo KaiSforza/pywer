@@ -2,6 +2,7 @@
 import libaur.aur as libaur
 import libaur.printer
 import libaur.errors as error
+import libaur
 import configparser
 import xdg.BaseDirectory
 import argparse
@@ -50,6 +51,9 @@ if __name__ == '__main__':
     options.add_argument('-t', '--target',
                         help='Specify an alternate download location',
                         metavar='dir')
+    options.add_argument('-V', '--version',
+                        help='Print version',
+                        action='version', version='%(prog)s {}'.format(libaur.__version__))
     args = parser.parse_args()
 
     config = configparser.ConfigParser()

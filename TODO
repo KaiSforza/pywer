@@ -37,7 +37,7 @@ pywer
   * --threads (needed??)
   * --timeout (needed??)
   * --verbose
-  * --version
+  * DONE--version
 
 libaur
 ^^^^^^
