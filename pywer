@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import libaur.aur as libaur
 import libaur.printer
+import libaur.errors as error
 import configparser
 import xdg.BaseDirectory
 import argparse
@@ -11,6 +12,8 @@ config = configparser.ConfigParser()
 config.read(xdg.BaseDirectory.xdg_config_home + '/pywer/pywer.ini')
 
 if __name__ == '__main__':
+    if not path.exists('{}/pywer/pywer.ini'.format(xdg.BaseDirectory.xdg_config_home)):
+        raise error.ConfigMissing('pywer requires a config file at {}/pywer/pywer.ini.'.format(xdg.BaseDirectory.xdg_config_home))
     parser = argparse.ArgumentParser(
             description='A simple AUR helper in python.',
             epilog='See the config file in $PREFIX/share/doc/pywer. \
