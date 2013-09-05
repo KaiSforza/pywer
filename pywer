@@ -45,8 +45,11 @@ if __name__ == '__main__':
                         help='overwrite existing files while downloading',
                         action='store_true')
     options.add_argument('--config',
-                        help='Specify an alternat config',
+                        help='Specify an alternate config',
                         metavar='file')
+    options.add_argument('-t', '--target',
+                        help='Specify an alternate download location',
+                        metavar='dir')
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
@@ -57,8 +60,8 @@ if __name__ == '__main__':
     config.read(use_config)
 
 
-    if not path.exists('{}/pywer/pywer.ini'.format(use_config)):
-        message = 'pywer requires a config file at {}/pywer/pywer.ini. See `pywer -h`.'\
+    if not path.exists(use_config):
+        message = 'pywer requires a config file at {}. See `pywer -h`.'\
                 .format(use_config)
         raise error.ConfigMissing(message)
 
@@ -87,7 +90,10 @@ if __name__ == '__main__':
             _or = re.split(',', config['Repos']['IgnoreRepo'])
             libaur.printer.pretty_print_updpkgs(other_repos=_or, baseurl=_baseurl)
     elif args.download:
-        dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
+        if args.target:
+            dl_path = path.expanduser(args.target)
+        else:
+            dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
         dl_path = path.expandvars(dl_path)
         libaur.printer.download_pkgs([args.download], dl_path, dl_verbose=VERBOSE,
                 baseurl=_baseurl, dl_force=FORCE)
