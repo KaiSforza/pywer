@@ -13,7 +13,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
             description='A simple AUR helper in python.',
             epilog='See the config file in $PREFIX/share/doc/pywer. \
-                   Copy it to {} and edit it for use.'.format(xdg.BaseDirectory.xdg_config_home),
+                   Copy it to {} and edit it for use, or use `--config`.'\
+                   .format(xdg.BaseDirectory.xdg_config_home),
                    )
     # Operations
     # TODO: Find some way to only allow a single operation
