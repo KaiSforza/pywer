@@ -5,6 +5,6 @@ A simple python AUR library
 '''
 
 __title__ = 'libaur'
-__version__ = '0.4'
+__version__ = '0.5'
 __author__ = 'William Giokas'
 __license__ = 'MIT'
