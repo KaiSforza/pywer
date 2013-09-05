@@ -20,7 +20,7 @@ pywer
   * DONE--update
   * --update --download
   * --brief
-  * --color
+  * DONE--color (kind of)
   * --debug
   * DONE--force
   * --format=

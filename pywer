@@ -55,6 +55,12 @@ if __name__ == '__main__':
     options.add_argument('--no-ignore-ood',
                         help='Do not ignore out of date packages',
                         action='store_true')
+    options.add_argument('-c', '--color',
+                        help='Use color',
+                        action='store_true')
+    options.add_argument('--no-color',
+                        help='Do not use color',
+                        action='store_true')
     config_opts = parser.add_argument_group('Configuration Options')
     config_opts.add_argument('--ignorerepo',
                         help='Specify comma separated list of repos to ignore',
@@ -86,6 +92,15 @@ if __name__ == '__main__':
     if args.no_ignore_ood:
         SHOW_OOD=True
 
+    if args.color:
+        USE_COLOR = True
+    elif args.no_color:
+        USE_COLOR = False
+    elif config['Repos']['Color'] == 'yes':
+        USE_COLOR = True
+    else:
+        USE_COLOR = False
+
     VERBOSE=True
     if args.quiet:
         VERBOSE=False
@@ -101,13 +116,14 @@ if __name__ == '__main__':
 
     if args.search:
         libaur.printer.pretty_print_search(args.search, baseurl=_baseurl,
-                ood=SHOW_OOD, be_verbose=VERBOSE)
+                ood=SHOW_OOD, be_verbose=VERBOSE, color=USE_COLOR)
     elif args.msearch:
         libaur.printer.pretty_print_search(args.msearch, stype='msearch',
-                baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE)
+                baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
+                color=USE_COLOR)
     elif args.info:
         libaur.printer.pretty_print_simple_info(args.info, baseurl=_baseurl,
-                ood=SHOW_OOD)
+                ood=SHOW_OOD, color=USE_COLOR)
     elif args.download:
         if args.target:
             dl_path = path.expanduser(args.target)
@@ -115,14 +131,16 @@ if __name__ == '__main__':
             dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
         dl_path = path.expandvars(dl_path)
         libaur.printer.download_pkgs(args.download, dl_path, dl_verbose=VERBOSE,
-                baseurl=_baseurl, dl_force=FORCE, ood=SHOW_OOD)
+                baseurl=_baseurl, dl_force=FORCE, ood=SHOW_OOD, color=USE_COLOR)
     elif not args.update == '-DEFAULT':
         if args.ignorerepo:
             libaur.printer.pretty_print_updpkgs(other_repos=[args.ignorerepo],
-                    baseurl=_baseurl, pkgs=args.update, be_verbose=VERBOSE)
+                    baseurl=_baseurl, pkgs=args.update, be_verbose=VERBOSE,
+                    color=USE_COLOR)
         else:
             _or = re.split(',', config['Repos']['IgnoreRepo'])
             libaur.printer.pretty_print_updpkgs(other_repos=_or,
-                    baseurl=_baseurl, pkgs=args.update, be_verbose=VERBOSE)
+                    baseurl=_baseurl, pkgs=args.update, be_verbose=VERBOSE,
+                    color=USE_COLOR)
     else:
         print('error: No operation specified. (use -h for help)')
