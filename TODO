@@ -21,7 +21,7 @@ pywer
   * --update --download
   * --brief
   * --color
-  * --debut
+  * --debug
   * DONE--force
   * --format=
   * --ignore=
