@@ -12,8 +12,6 @@ config = configparser.ConfigParser()
 config.read(xdg.BaseDirectory.xdg_config_home + '/pywer/pywer.ini')
 
 if __name__ == '__main__':
-    if not path.exists('{}/pywer/pywer.ini'.format(xdg.BaseDirectory.xdg_config_home)):
-        raise error.ConfigMissing('pywer requires a config file at {}/pywer/pywer.ini.'.format(xdg.BaseDirectory.xdg_config_home))
     parser = argparse.ArgumentParser(
             description='A simple AUR helper in python.',
             epilog='See the config file in $PREFIX/share/doc/pywer. \
@@ -50,6 +48,11 @@ if __name__ == '__main__':
                         help='overwrite existing files while downloading',
                         action='store_true')
     args = parser.parse_args()
+
+    if not path.exists('{}/pywer/pywer.ini'.format(xdg.BaseDirectory.xdg_config_home)):
+        message = 'pywer requires a config file at {}/pywer/pywer.ini. See `pywer -h`.'\
+                .format(xdg.BaseDirectory.xdg_config_home)
+        raise error.ConfigMissing(message)
 
     VERBOSE=True
     if args.quiet:
