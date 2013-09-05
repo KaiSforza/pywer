@@ -148,9 +148,10 @@ class UpdatedPkgs():
     def list_ignored_repo_pkgs(self):
         '''list packages in the other_repos list'''
         ignlist = []
-        for aur_repos in self.other_repos:
-            ignlist.extend(subprocess.check_output([ '/usr/bin/paclist', aur_repos],
-                universal_newlines=True).splitlines())
+        if self.other_repos[0]:
+            for aur_repos in self.other_repos:
+                ignlist.extend(subprocess.check_output([ '/usr/bin/paclist', aur_repos],
+                    universal_newlines=True).splitlines())
         return ignlist
 
     def get_upd_pkgs(self, packages=[]):
