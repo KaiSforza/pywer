@@ -34,7 +34,8 @@ CATEGORIES = {
         19:'kernels',
         }
 
-def pretty_print_search(package, stype='search', baseurl=None, ood=True):
+def pretty_print_search(package, stype='search', baseurl=None, ood=True,
+        be_verbose=True):
     '''
     Print out search results
 
@@ -42,6 +43,8 @@ def pretty_print_search(package, stype='search', baseurl=None, ood=True):
     package (str) -- A string to search for
     stype (str) -- What type of search to use, one of 'search' or 'msearch'
     baseurl (str) -- Where the AUR you are using is located
+    ood (bool) -- Whether to show out of date items
+    be_verbose (bool) -- Be verbose
     '''
     json_output = SearchPkg(package, baseurl=baseurl,
             req_type=stype).get_results()
@@ -58,8 +61,11 @@ def pretty_print_search(package, stype='search', baseurl=None, ood=True):
         numvotes = json_output[i]['NumVotes']
         description = json_output[i]['Description']
 
-        print('aur/{} {} {}({})\n    {}'.format(name, version, is_ood,
-            numvotes, description))
+        if be_verbose:
+            print('aur/{} {} {}({})\n    {}'.format(name, version, is_ood,
+                numvotes, description))
+        else:
+            print(name)
 
 def pretty_print_simple_info(packages, baseurl=None, ood=True):
     '''
@@ -68,6 +74,7 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True):
     Arguments:
     package (str) -- A string to search for
     baseurl (str) -- Where the AUR you are using is located
+    ood (bool) -- Whether to show out of date items
     '''
     json_output = InfoPkg(packages,
             baseurl=baseurl).get_results()
@@ -126,7 +133,8 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True):
 
         print()
 
-def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[]):
+def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
+        be_verbose=True):
     '''
     Print a list of packages that need updating
 
@@ -134,14 +142,19 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[]):
     other_repos (list) -- A list of repos to not treat as official
                 repositories.
     baseurl (str) -- Where the AUR you are using is located
+    ood (bool) -- Whether to show out of date items
+    be_verbose (bool) -- Be verbose
     '''
     if not isinstance(pkgs, list):
         raise TypeError('Must be a list')
     a = UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl)
     upddict = a.get_upd_pkgs()
     for pkgs in sorted(upddict.keys()):
-        print('{} {} => {}'.format(pkgs, upddict[pkgs]['oldver'],
-            upddict[pkgs]['newver']))
+        if be_verbose:
+            print('{} {} => {}'.format(pkgs, upddict[pkgs]['oldver'],
+                upddict[pkgs]['newver']))
+        else:
+            print(pkgs)
 
 def download_pkgs(list_of_pkgs, dl_path, dl_verbose=True, baseurl=None,
         dl_force=False, ood=True):
@@ -152,13 +165,15 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=True, baseurl=None,
     dl_path (path) -- Location that packages are downloaded to
     dl_verbose (Bool) -- Whether to be verbose or not
     baseurl (str) -- Where the AUR you are using is located
+    ood (bool) -- Whether to show out of date items
     '''
     _a = GetPkgs(list_of_pkgs, baseurl=baseurl)
     _a.get_results()
     for i in range(len(_a.json_output)):
         pkgname = _a.json_output[i]['Name']
         if not _a.json_output[i]['OutOfDate'] == 0 and not ood:
-            print(':: no results for {}'.format(pkgname))
+            if dl_verbose:
+                print(':: no results for {}'.format(pkgname))
             continue
         pkgver = _a.json_output[i]['Version']
         if path.exists('{}/{}'.format(dl_path, pkgname)) and not dl_force:

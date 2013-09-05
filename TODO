@@ -32,7 +32,7 @@ pywer
   * --sort
   * --rsort
   * --from-pkgbuild
-  * --quiet (partially done)
+  * DONE--quiet
   * DONE--target
   * --threads (needed??)
   * --timeout (needed??)

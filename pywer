@@ -93,10 +93,10 @@ if __name__ == '__main__':
 
     if args.search:
         libaur.printer.pretty_print_search(args.search, baseurl=_baseurl,
-                ood=SHOW_OOD)
+                ood=SHOW_OOD, be_verbose=VERBOSE)
     elif args.msearch:
         libaur.printer.pretty_print_search(args.msearch, stype='msearch',
-                baseurl=_baseurl, ood=SHOW_OOD)
+                baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE)
     elif args.info:
         libaur.printer.pretty_print_simple_info(args.info, baseurl=_baseurl,
                 ood=SHOW_OOD)
@@ -111,10 +111,10 @@ if __name__ == '__main__':
     elif not args.update == '-DEFAULT':
         if args.ignorerepo:
             libaur.printer.pretty_print_updpkgs(other_repos=[args.ignorerepo],
-                    baseurl=_baseurl, pkgs=args.update)
+                    baseurl=_baseurl, pkgs=args.update, be_verbose=VERBOSE)
         else:
             _or = re.split(',', config['Repos']['IgnoreRepo'])
             libaur.printer.pretty_print_updpkgs(other_repos=_or,
-                    baseurl=_baseurl, pkgs=args.update)
+                    baseurl=_baseurl, pkgs=args.update, be_verbose=VERBOSE)
     else:
         print('error: No operation specified. (use -h for help)')
