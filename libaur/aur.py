@@ -142,8 +142,7 @@ class UpdatedPkgs():
         '''list packages in 'pacman -Q' format as specified'''
         cmd = ['/usr/bin/pacman', '-Q']
         cmd.extend(self.pkgs)
-        return subprocess.check_output(cmd,
-                universal_newlines=True).splitlines()
+        subprocess.check_output(cmd, universal_newlines=True).splitlines()
 
     def list_ignored_repo_pkgs(self):
         '''list packages in the other_repos list'''

@@ -124,6 +124,8 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[]):
                 repositories.
     baseurl (str) -- Where the AUR you are using is located
     '''
+    if not isinstance(pkgs, list):
+        raise TypeError('Must be a list')
     a = UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl)
     upddict = a.get_upd_pkgs()
     for pkgs in sorted(upddict.keys()):
@@ -140,8 +142,6 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=False, baseurl=None,
     dl_verbose (Bool) -- Whether to be verbose or not
     baseurl (str) -- Where the AUR you are using is located
     '''
-    if not isinstance(list_of_pkgs, list):
-        raise TypeError('Must be a list')
     _a = GetPkgs(list_of_pkgs, baseurl=baseurl)
     _a.get_results()
     for i in range(len(_a.json_output)):
