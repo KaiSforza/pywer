@@ -5,6 +5,8 @@ Used to print information from libaur.aur
 '''
 
 from .aur import *
+from os import path
+from .errors import *
 from .__init__ import __version__
 import re
 
@@ -61,7 +63,8 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None):
         print('{} {} => {}'.format(pkgs, upddict[pkgs]['oldver'],
             upddict[pkgs]['newver']))
 
-def download_pkgs(list_of_pkgs, dl_path, dl_verbose=False, baseurl=None):
+def download_pkgs(list_of_pkgs, dl_path, dl_verbose=False, baseurl=None,
+        dl_force=False):
     '''
     Download packages
 
@@ -77,11 +80,14 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=False, baseurl=None):
     _a = GetPkgs(list_of_pkgs, baseurl=baseurl)
     _a.get_results()
     for i in range(len(_a.json_output)):
+        pkgname = _a.json_output[i]['Name']
+        pkgver = _a.json_output[i]['Version']
+        if path.exists('{}/{}'.format(dl_path, pkgname)) and not dl_force:
+            raise FileExists('{}/{} already exists. Use --force to overwrite'.format(dl_path, pkgname))
         if dl_verbose:
-            print(':: Downloading {} {}...'.format(_a.json_output[i]['Name'],
-                _a.json_output[i]['Version']))
+            print(':: Downloading {} {}...'.format(pkgname, pkgver))
         _a.get_stream(i)
-        _a.get_tarfile(dl_path)
+        _a.get_tarfile(dl_path, force=dl_force)
     if dl_verbose:
         print('Finished downloading packages.')
 

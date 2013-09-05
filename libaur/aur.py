@@ -13,8 +13,10 @@ import json
 import re
 import distutils.version
 import tarfile
+from os import path
 
 from .__init__ import __version__
+from .errors import *
 
 class SearchPkg(object):
     '''Search for packages on the AUR.'''
@@ -68,7 +70,7 @@ class GetPkgs(InfoPkg):
         self.stream = requests.get('{}{}'.format(self.baseurl,
                 self.json_output[num]['URLPath']), stream=True)
 
-    def get_tarfile(self, extpath):
+    def get_tarfile(self, extpath, force=False):
         '''
         Arguments:
         extpath -- Where the files should be extracted. Will create something

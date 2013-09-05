@@ -43,11 +43,18 @@ if __name__ == '__main__':
     options.add_argument('--ignorerepo',
                         help='Specify a repo to ignore',
                         metavar='repo')
+    options.add_argument('-f', '--force',
+                        help='overwrite existing files while downloading',
+                        action='store_true')
     args = parser.parse_args()
 
     VERBOSE=True
     if args.quiet:
         VERBOSE=False
+
+    FORCE=False
+    if args.force:
+        FORCE=True
 
     _baseurl = config['AUR']['BaseUrl']
 
@@ -69,6 +76,6 @@ if __name__ == '__main__':
         dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
         dl_path = path.expandvars(dl_path)
         libaur.printer.download_pkgs([args.download], dl_path, dl_verbose=VERBOSE,
-                baseurl=_baseurl)
+                baseurl=_baseurl, dl_force=FORCE)
     else:
         print('error: No operation specified. (use -h for help)')

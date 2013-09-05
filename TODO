@@ -22,7 +22,7 @@ pywer
   * --brief
   * --color
   * --debut
-  * --force
+  * DONE--force
   * --format=
   * --ignore=
   * DONE--ignorerepo[=]
