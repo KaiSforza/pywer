@@ -87,16 +87,18 @@ class UpdatedPkgs():
     This class is used for grabbing lists of updated packages from the AUR
     specified by 'baseurl'.
     '''
-    def __init__(self, other_repos=[],
+    def __init__(self, other_repos=[], pkgs=[],
             baseurl='https://aur.archlinux.org'):
         '''
         Arguments:
         other_repos=[] -- A list of repos to ignore becuase they contain AUR
                     packages. Defaults to an empty list, ignoring no repos.
+        pkgs=[] -- A list of packages to operate on
         baseurl='https://aur.archlinux.org' -- A string pointing to the
                     rpc interface for an AUR site.
         '''
         self.baseurl = baseurl
+        self.pkgs = pkgs
         self.other_repos = other_repos
 
     def __init_local(self):
@@ -105,7 +107,7 @@ class UpdatedPkgs():
         See __init_remote__() for pulling package lists from an AUR.
         '''
         if self.pkgs:
-            self.aurlist = self.list_given_pkgs_and_ver(self.pkgs)
+            self.aurlist = self.list_given_pkgs_and_ver()
         else:
             # Create a list ['pkgname pkgver']
             self.aurlist = self.list_unofficial_pkgs()
@@ -125,11 +127,8 @@ class UpdatedPkgs():
         #       ['pkg1', 'pkg2', ...]
         self.pkgnames = list(self.aurpkgs.keys())
 
-    def __init_remote(self, pkgs=[]):
-        '''
-        get json result from a multiinfo request
-        '''
-        self.pkgs = pkgs
+    def __init_remote(self):
+        '''get json result from a multiinfo request'''
         # Requires execution of __init_local__()
         self.__init_local()
         self.all_pkg_info = InfoPkg(self.pkgnames, baseurl=self.baseurl).get_results()
@@ -139,9 +138,10 @@ class UpdatedPkgs():
         return subprocess.check_output(['/usr/bin/pacman', '-Q', '-m'],
                 universal_newlines=True).splitlines()
 
-    def list_given_pkgs_and_ver(self, pkgs):
+    def list_given_pkgs_and_ver(self):
+        '''list packages in 'pacman -Q' format as specified'''
         cmd = ['/usr/bin/pacman', '-Q']
-        cmd.extend(pkgs)
+        cmd.extend(self.pkgs)
         return subprocess.check_output(cmd,
                 universal_newlines=True).splitlines()
 
@@ -159,7 +159,7 @@ class UpdatedPkgs():
         Returns: dictionary:
             {pkgname:{'oldver':installedversion, 'newver':aur_version}, ...}
         '''
-        self.__init_remote(pkgs=packages)
+        self.__init_remote()
         # Initialize the return list
         add_to_update = {}
         # We want to go through each package dictionary returned by InfoPkg

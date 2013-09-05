@@ -124,8 +124,8 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[]):
                 repositories.
     baseurl (str) -- Where the AUR you are using is located
     '''
-    a = UpdatedPkgs(other_repos, baseurl=baseurl)
-    upddict = a.get_upd_pkgs(pkgs)
+    a = UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl)
+    upddict = a.get_upd_pkgs()
     for pkgs in sorted(upddict.keys()):
         print('{} {} => {}'.format(pkgs, upddict[pkgs]['oldver'],
             upddict[pkgs]['newver']))
