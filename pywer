@@ -22,16 +22,16 @@ if __name__ == '__main__':
                         metavar='term')
     operations.add_argument('-i', '--info',
                         help='Get info for this package',
-                        metavar='pkg')
+                        metavar='pkg', nargs='+')
     operations.add_argument('-m', '--msearch',
                         help='Search for this maintainers packages',
                         metavar='maintainer')
     operations.add_argument('-u', '--update',
                         help='Print package updates for the system',
-                        action='store_true')
+                        metavar='pkg', nargs='*', default='-DEFAULT')
     operations.add_argument('-d', '--download',
                         help='Download the package',
-                        metavar='pkg')
+                        metavar='pkg', nargs='+')
 
     # Options
     options = parser.add_argument_group('Options')
@@ -39,7 +39,7 @@ if __name__ == '__main__':
                         help='Be quieter',
                         action='store_true')
     options.add_argument('--ignorerepo',
-                        help='Specify a repo to ignore',
+                        help='Specify comma separated list of repos to ignore',
                         metavar='repo')
     options.add_argument('-f', '--force',
                         help='overwrite existing files while downloading',
@@ -81,21 +81,22 @@ if __name__ == '__main__':
         libaur.printer.pretty_print_search(args.msearch, stype='msearch',
                 baseurl=_baseurl)
     elif args.info:
-        libaur.printer.pretty_print_simple_info([args.info], baseurl=_baseurl)
-    elif args.update:
-        if args.ignorerepo:
-            libaur.printer.pretty_print_updpkgs(other_repos=[args.ignorerepo],
-                    baseurl=_baseurl)
-        else:
-            _or = re.split(',', config['Repos']['IgnoreRepo'])
-            libaur.printer.pretty_print_updpkgs(other_repos=_or, baseurl=_baseurl)
+        libaur.printer.pretty_print_simple_info(args.info, baseurl=_baseurl)
     elif args.download:
         if args.target:
             dl_path = path.expanduser(args.target)
         else:
             dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
         dl_path = path.expandvars(dl_path)
-        libaur.printer.download_pkgs([args.download], dl_path, dl_verbose=VERBOSE,
+        libaur.printer.download_pkgs(args.download, dl_path, dl_verbose=VERBOSE,
                 baseurl=_baseurl, dl_force=FORCE)
+    elif not args.update == '-DEFAULT':
+        if args.ignorerepo:
+            libaur.printer.pretty_print_updpkgs(other_repos=[args.ignorerepo],
+                    baseurl=_baseurl, pkgs=args.update)
+        else:
+            _or = re.split(',', config['Repos']['IgnoreRepo'])
+            libaur.printer.pretty_print_updpkgs(other_repos=_or,
+                    baseurl=_baseurl, pkgs=args.update)
     else:
         print('error: No operation specified. (use -h for help)')

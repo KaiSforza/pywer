@@ -104,10 +104,13 @@ class UpdatedPkgs():
         Initializes the lists of packages and dictionaries for local items.
         See __init_remote__() for pulling package lists from an AUR.
         '''
-        # Create a list ['pkgname pkgver']
-        self.aurlist = self.list_unofficial_pkgs()
-        # Append packages from repo to aurlist
-        self.aurlist.extend(self.list_ignored_repo_pkgs())
+        if self.pkgs:
+            self.aurlist = self.list_given_pkgs_and_ver(self.pkgs)
+        else:
+            # Create a list ['pkgname pkgver']
+            self.aurlist = self.list_unofficial_pkgs()
+            # Append packages from repo to aurlist
+            self.aurlist.extend(self.list_ignored_repo_pkgs())
         #aurlist.append('pacman-git 4.1.2.r116.gfeb2087-1')
         # Initialize a list that will be converted to a dictionary later
         self.aurpkgs = {}
@@ -122,10 +125,11 @@ class UpdatedPkgs():
         #       ['pkg1', 'pkg2', ...]
         self.pkgnames = list(self.aurpkgs.keys())
 
-    def __init_remote(self):
+    def __init_remote(self, pkgs=[]):
         '''
         get json result from a multiinfo request
         '''
+        self.pkgs = pkgs
         # Requires execution of __init_local__()
         self.__init_local()
         self.all_pkg_info = InfoPkg(self.pkgnames, baseurl=self.baseurl).get_results()
@@ -133,6 +137,12 @@ class UpdatedPkgs():
     def list_unofficial_pkgs(self):
         '''list packages with 'pacman -Qm' '''
         return subprocess.check_output(['/usr/bin/pacman', '-Q', '-m'],
+                universal_newlines=True).splitlines()
+
+    def list_given_pkgs_and_ver(self, pkgs):
+        cmd = ['/usr/bin/pacman', '-Q']
+        cmd.extend(pkgs)
+        return subprocess.check_output(cmd,
                 universal_newlines=True).splitlines()
 
     def list_ignored_repo_pkgs(self):
@@ -143,13 +153,13 @@ class UpdatedPkgs():
                 universal_newlines=True).splitlines())
         return ignlist
 
-    def get_upd_pkgs(self):
+    def get_upd_pkgs(self, packages=[]):
         '''
         Get updated packages
         Returns: dictionary:
             {pkgname:{'oldver':installedversion, 'newver':aur_version}, ...}
         '''
-        self.__init_remote()
+        self.__init_remote(pkgs=packages)
         # Initialize the return list
         add_to_update = {}
         # We want to go through each package dictionary returned by InfoPkg

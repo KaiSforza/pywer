@@ -115,7 +115,7 @@ def pretty_print_simple_info(packages, baseurl=None):
 
         print()
 
-def pretty_print_updpkgs(other_repos=[], baseurl=None):
+def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[]):
     '''
     Print a list of packages that need updating
 
@@ -125,7 +125,7 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None):
     baseurl (str) -- Where the AUR you are using is located
     '''
     a = UpdatedPkgs(other_repos, baseurl=baseurl)
-    upddict = a.get_upd_pkgs()
+    upddict = a.get_upd_pkgs(pkgs)
     for pkgs in sorted(upddict.keys()):
         print('{} {} => {}'.format(pkgs, upddict[pkgs]['oldver'],
             upddict[pkgs]['newver']))
