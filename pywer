@@ -61,6 +61,9 @@ if __name__ == '__main__':
     options.add_argument('--no-ignore-ood',
                         help='Do not ignore out of date packages',
                         action='store_true')
+    options.add_argument('--baseurl',
+                        help='Set a custom baseurl to an AUR',
+                        metavar='url')
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
@@ -90,7 +93,10 @@ if __name__ == '__main__':
     if args.force:
         FORCE=True
 
-    _baseurl = config['AUR']['BaseUrl']
+    if args.baseurl:
+        _baseurl = args.baseurl
+    else:
+        _baseurl = config['AUR']['BaseUrl']
 
     if args.search:
         libaur.printer.pretty_print_search(args.search, baseurl=_baseurl,
