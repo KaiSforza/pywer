@@ -6,9 +6,33 @@ Used to print information from libaur.aur
 
 from .aur import *
 from os import path
+from subprocess import call,DEVNULL
+import time
 from .errors import *
 from .__init__ import __version__
 import re
+
+CATEGORIES = {
+        1: 'None',
+        2: 'daemons',
+        3: 'devel',
+        4: 'editors',
+        5: 'emulators',
+        6: 'games',
+        7: 'gnome',
+        8: 'i18n',
+        9: 'kde',
+        10:'lib',
+        11:'modules',
+        12:'multimedia',
+        13:'network',
+        14:'office',
+        15:'science',
+        16:'system',
+        17:'X11',
+        18:'xfce',
+        19:'kernels',
+        }
 
 def pretty_print_search(package, stype='search', baseurl=None):
     '''
@@ -43,9 +67,52 @@ def pretty_print_simple_info(packages, baseurl=None):
     '''
     json_output = InfoPkg(packages,
             baseurl=baseurl).get_results()
+    localized = time.localtime()
+    if localized.tm_isdst == 1:
+        tzdiff = localized.tm_isdst * 3600
+    else:
+        tzdiff = 0
+
     for i in range(len(json_output)):
-        for field in ['Name', 'Maintainer', 'Version', 'URL', 'License']:
-            print('{:<12}: {}'.format(field, json_output[i][field]))
+        info_dict = {}
+        info_dict['repo'] = '{:<15}: {}'.format('Repository', 'aur')
+        # If it's installed, add the [installed] flag to the name
+        if call(['/usr/bin/pacman', '-Qq', json_output[i]['Name']],
+                stdout=DEVNULL, stderr=DEVNULL) == 0:
+            installed = ' [installed]'
+        else:
+            installed = ''
+        info_dict['Name'] = '{:<15}: {}{}'.format('Name',
+                json_output[i]['Name'], installed)
+        # Get the easy, plain strings
+        for field in ['Version', 'URL', 'License', 'Maintainer',
+                'Description']:
+            info_dict[field] = '{:<15}: {}'.format(field, json_output[i][field])
+        info_dict['Votes'] = '{:<15}: {}'.format(field,
+                json_output[i]['NumVotes'])
+        # Format the date fields using 'time'
+        for field in ['FirstSubmitted', 'LastModified']:
+            if field == 'FirstSubmitted':
+                pretty_field = 'Submitted'
+            else:
+                pretty_field = 'Last Modified'
+            sec_time = json_output[i][field]
+            info_dict[pretty_field] = '{:<15}: {}'.format(pretty_field, 
+                    time.ctime(json_output[i][field] + time.timezone - tzdiff))
+        # Out of date or not
+        if json_output[i]['OutOfDate'] == 1:
+            info_dict['Out Of Date'] = '{:<15}: {}'.format('Out Of Date', 'Yes')
+        else:
+            info_dict['Out Of Date'] = '{:<15}: {}'.format('Out Of Date', 'No')
+        info_dict['AUR Page'] = '{:<15}: {}/packages/{}'.format('AUR Page',
+                baseurl, json_output[i]['Name'])
+        info_dict['Category'] = '{:<15}: {}'.format('Category', CATEGORIES[json_output[i]['CategoryID']])
+
+        for field in ['repo', 'Name', 'Version', 'URL', 'AUR Page', 'Category',
+                'License', 'Votes', 'Out Of Date', 'Maintainer', 'Submitted',
+                'Last Modified', 'Description']:
+            print(info_dict[field])
+
         print()
 
 def pretty_print_updpkgs(other_repos=[], baseurl=None):
