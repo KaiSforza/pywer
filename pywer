@@ -77,7 +77,7 @@ if __name__ == '__main__':
         raise error.ConfigMissing(message)
 
     SHOW_OOD=True
-    if args.ignore_ood:
+    if args.ignore_ood or config['Repos']['IgnoreOOD'] == 'yes':
         SHOW_OOD=False
     if args.no_ignore_ood:
         SHOW_OOD=True
