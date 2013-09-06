@@ -35,13 +35,13 @@ CATEGORIES = {
         19:'kernels',
         }
 
-def pretty_print_search(package, stype='search', baseurl=None, ood=True,
+def pretty_print_search(term, stype='search', baseurl=None, ood=True,
         be_verbose=True, color=False):
     '''
     Print out search results
 
     Arguments:
-    package (str) -- A string to search for
+    term (str) -- A string to search for
     stype (str) -- What type of search to use, one of 'search' or 'msearch'
     baseurl (str) -- Where the AUR you are using is located
     ood (bool) -- Whether to show out of date items
@@ -49,7 +49,7 @@ def pretty_print_search(package, stype='search', baseurl=None, ood=True,
     color (bool) -- Whether to use color
     '''
     _color = Color(color)
-    json_output = SearchPkg(package, baseurl=baseurl,
+    json_output = SearchPkg(term, baseurl=baseurl,
             req_type=stype).get_results()
     for i in range(len(json_output)):
         if json_output[i]['OutOfDate'] == 0:

@@ -154,7 +154,7 @@ class UpdatedPkgs():
                     universal_newlines=True).splitlines())
         return ignlist
 
-    def get_upd_pkgs(self, packages=[]):
+    def get_upd_pkgs(self):
         '''
         Get updated packages
         Returns: dictionary:
