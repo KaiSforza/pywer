@@ -5,3 +5,6 @@ class FileExists(OSError):
 
 class ConfigMissing(OSError):
     pass
+
+class ConfigWrongVersion(OSError):
+    pass
