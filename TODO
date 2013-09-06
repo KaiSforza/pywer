@@ -46,14 +46,14 @@ libaur
 
 Docs
 ^^^^
-* Better documentation. Possibly a separate docs/ tree for building with
+* DONE - Better documentation. Possibly a separate docs/ tree for building with
   sphinx or something with more info on the library and its use
 
 Aesthetics
 ^^^^^^^^^^
-* Colors
-* Flags for colors (see 'pywer')
+* DONE - Colors
+* DONE - Flags for colors (see 'pywer')
 
 Tests
 ^^^^^
-* We need these. Plain and simple.
+* We need these. Plain and simple. Started this with some simple tests
