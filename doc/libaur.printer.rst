@@ -22,7 +22,7 @@ Data
 Functions
 ---------
 
-.. function:: pretty_print_search(term, stype='search', baseurl=None, ood=True, be_verbose=True, color=False)
+.. function:: pretty_print_search(term, stype='search', baseurl=None, ood=True, be_verbose=0, color=False)
 
    Print out the results from a search run by :class:`libaur.aur.SearchPkg`.
    *term* is the string to search for. *stype* is the same as
@@ -34,11 +34,11 @@ Functions
    output, showing all fields but `ID`. *package* is a list of pacakges to
    get information for.
 
-.. function:: pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[], be_verbose=True, color=False)
+.. function:: pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[], be_verbose=0, color=False)
 
    Prints a user-readable list of updatable packages.
 
-.. function:: download_pkgs(list_of_pkgs, dl_path, dl_verbose=True, baseurl=None, dl_force=False, ood=True, color=False)
+.. function:: download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None, dl_force=False, ood=True, color=False)
 
    Download packages with pretty output when completed.
 

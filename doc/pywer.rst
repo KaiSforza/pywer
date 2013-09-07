@@ -43,6 +43,9 @@ Options
 -q, --quiet
     Be quieter
 
+-v, --verbose
+    Be verbose
+
 -f, --force
     Allow overwriting of download directory
 

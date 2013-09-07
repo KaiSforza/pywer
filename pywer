@@ -41,7 +41,10 @@ if __name__ == '__main__':
     options = parser.add_argument_group('Options')
     options.add_argument('-q', '--quiet',
                         help='Be quieter',
-                        action='store_true')
+                        action='count', default=0)
+    options.add_argument('-v', '--verbose',
+                        help='Be verbose',
+                        action='count', default=0)
     options.add_argument('-f', '--force',
                         help='overwrite existing files while downloading',
                         action='store_true')
@@ -107,9 +110,7 @@ if __name__ == '__main__':
     else:
         USE_COLOR = False
 
-    VERBOSE=True
-    if args.quiet:
-        VERBOSE=False
+    VERBOSE = args.verbose - args.quiet
 
     FORCE=False
     if args.force:

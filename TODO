@@ -36,7 +36,7 @@ pywer
   * DONE--target
   * --threads (needed??)
   * --timeout (needed??)
-  * --verbose
+  * DONE--verbose
   * DONE--version
 
 libaur
