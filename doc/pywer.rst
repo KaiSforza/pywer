@@ -2,12 +2,7 @@
 =========
 Synopsis
 --------
-| **pywer** [options] <operation>
-| **pywer** -d pkg [pkg ...]
-| **pywer** -i pkg [pkg ...]
-| **pywer** -u [pkg [pkg ...]]
-| **pywer** -s searchterm
-| **pywer** -m maintainer
+| **pywer** [options] <operation> [target [target...]]
 
 Description
 -----------
@@ -23,19 +18,24 @@ Operations
 ----------
 
 -d, --download
-    Download package(s) specified as arguments
+    Download package(s) specified as arguments. Requires at least one
+    target.
 
 -s, --search
-    Search for the specified term
+    Search for the specified term. Only takes one target.
 
 -m, --msearch
-    Search for the specified maintainer
+    Search for the specified maintainer. Only takes one target.
 
 -i, --info
-    Get some basic information on the package(s) specified
+    Get some basic information on the package(s) specified. Takes one or
+    more targets.
 
 -u, --update
-    Check for updates on all installed packages or the specified package
+    Check for updates on all installed packages or the specified package.
+    Takes zero or more targets. With no targets, it will search for updates
+    on all of the installed packages that are not in official repos. See
+    **--ignorerepo**.
 
 Options
 -------
@@ -69,8 +69,8 @@ Options
 --no-color
     Don't use color
 
---ignorerepo repo[,repo2,...repoN]
-    Ignore the repos. Requires a comman separated list or single repo name.
+--ignorerepo repos
+    Ignore the repo or list of repos. Space separated.
 
 -t dir, --target dir
     Download to `dir` instead of the one specified in the pywer config.

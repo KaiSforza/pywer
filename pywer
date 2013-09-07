@@ -11,6 +11,7 @@ from os import path
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
+            usage='%(prog)s [options] operation [target [target...]]',
             description='A simple AUR helper in python.',
             epilog='See the config file in $PREFIX/share/doc/pywer. \
                    Copy it to {} and edit it for use, or use `--config`.\
@@ -20,22 +21,25 @@ if __name__ == '__main__':
                    )
     # Operations
     # TODO: Find some way to only allow a single operation
+    parser.add_argument('targ',
+                        help='target to perform \'operation\' on',
+                        nargs='*', default='-DEFAULT', metavar='target')
     operations = parser.add_argument_group('Operations')
     operations.add_argument('-s', '--search',
                         help='Search for this package',
-                        metavar='term')
+                        action='count', default=0)
     operations.add_argument('-i', '--info',
                         help='Get info for this package',
-                        metavar='pkg', nargs='+')
+                        action='count', default=0)
     operations.add_argument('-m', '--msearch',
                         help='Search for this maintainers packages',
-                        metavar='maintainer')
+                        action='count', default=0)
     operations.add_argument('-u', '--update',
                         help='Print package updates for the system',
-                        metavar='pkg', nargs='*', default='-DEFAULT')
+                        action='count', default=0)
     operations.add_argument('-d', '--download',
                         help='Download the package',
-                        metavar='pkg', nargs='+')
+                        action='count', default=0)
 
     # Options
     options = parser.add_argument_group('Options')
@@ -66,14 +70,13 @@ if __name__ == '__main__':
     options.add_argument('--no-color',
                         help='Do not use color',
                         action='store_true')
-    config_opts = parser.add_argument_group('Configuration Options')
-    config_opts.add_argument('--ignorerepo',
+    options.add_argument('--ignorerepo',
                         help='Specify comma separated list of repos to ignore',
-                        metavar='repo')
-    config_opts.add_argument('-t', '--target',
+                        metavar='repo', nargs='+')
+    options.add_argument('-t', '--target',
                         help='Specify an alternate download location',
                         metavar='dir')
-    config_opts.add_argument('--baseurl',
+    options.add_argument('--baseurl',
                         help='Set a custom baseurl to an AUR',
                         metavar='url')
     args = parser.parse_args()
@@ -112,6 +115,11 @@ if __name__ == '__main__':
 
     VERBOSE = args.verbose - args.quiet
 
+    if sum([args.search, args.msearch, args.info, args.download,
+            args.update]) > 1:
+        raise error.ArgError('Only one operation allowed')
+
+
     FORCE=False
     if args.force:
         FORCE=True
@@ -122,14 +130,14 @@ if __name__ == '__main__':
         _baseurl = config['AUR']['BaseUrl']
 
     if args.search:
-        libaur.printer.pretty_print_search(args.search, baseurl=_baseurl,
+        libaur.printer.pretty_print_search(args.targ, baseurl=_baseurl,
                 ood=SHOW_OOD, be_verbose=VERBOSE, color=USE_COLOR)
     elif args.msearch:
-        libaur.printer.pretty_print_search(args.msearch, stype='msearch',
+        libaur.printer.pretty_print_search(args.targ, stype='msearch',
                 baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
                 color=USE_COLOR)
     elif args.info:
-        libaur.printer.pretty_print_simple_info(args.info, baseurl=_baseurl,
+        libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
                 ood=SHOW_OOD, color=USE_COLOR)
     elif args.download:
         if args.target:
@@ -137,17 +145,21 @@ if __name__ == '__main__':
         else:
             dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
         dl_path = path.expandvars(dl_path)
-        libaur.printer.download_pkgs(args.download, dl_path, dl_verbose=VERBOSE,
+        libaur.printer.download_pkgs(args.targ, dl_path, dl_verbose=VERBOSE,
                 baseurl=_baseurl, dl_force=FORCE, ood=SHOW_OOD, color=USE_COLOR)
-    elif not args.update == '-DEFAULT':
+    if args.update:
         if args.ignorerepo:
-            libaur.printer.pretty_print_updpkgs(other_repos=[args.ignorerepo],
-                    baseurl=_baseurl, pkgs=args.update, be_verbose=VERBOSE,
+            repo_ignore = args.ignorerepo
+        else:
+            repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
+        if args.targ== '-DEFAULT':
+            libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
+                    baseurl=_baseurl, be_verbose=VERBOSE,
                     color=USE_COLOR)
         else:
-            _or = re.split(',', config['Repos']['IgnoreRepo'])
-            libaur.printer.pretty_print_updpkgs(other_repos=_or,
-                    baseurl=_baseurl, pkgs=args.update, be_verbose=VERBOSE,
+            libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
+                    baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
                     color=USE_COLOR)
+
     else:
         print('error: No operation specified. (use -h for help)')

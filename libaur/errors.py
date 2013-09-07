@@ -8,3 +8,6 @@ class ConfigMissing(OSError):
 
 class ConfigWrongVersion(OSError):
     pass
+
+class ArgError(Exception):
+    pass
