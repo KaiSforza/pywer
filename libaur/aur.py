@@ -15,6 +15,9 @@ import distutils.version
 import tarfile
 from os import path
 
+# for comparing versions without vercmp
+from pyalpm import vercmp
+
 from .__init__ import __version__
 from .errors import *
 
@@ -136,22 +139,32 @@ class UpdatedPkgs():
 
     def list_unofficial_pkgs(self):
         '''list packages with 'pacman -Qm' '''
-        return subprocess.check_output(['/usr/bin/pacman', '-Q', '-m'],
+        unof = subprocess.check_output(['/usr/bin/pacman', '-Q', '-m'],
                 universal_newlines=True).splitlines()
+        return unof
 
     def list_given_pkgs_and_ver(self):
         '''list packages in 'pacman -Q' format as specified'''
         cmd = ['/usr/bin/pacman', '-Q']
         cmd.extend(self.pkgs)
-        return subprocess.check_output(cmd, universal_newlines=True).splitlines()
+        # TODO: Go through a list to simply skip over bad packages?
+        try:
+            givenpkgs = subprocess.check_output(cmd,
+                    universal_newlines=True).splitlines()
+        except Exception:
+            raise Exception('At least one package is invalid.')
+        return givenpkgs
 
     def list_ignored_repo_pkgs(self):
         '''list packages in the other_repos list'''
         ignlist = []
         if self.other_repos[0]:
             for aur_repos in self.other_repos:
-                ignlist.extend(subprocess.check_output([ '/usr/bin/paclist', aur_repos],
-                    universal_newlines=True).splitlines())
+                try:
+                    ignlist.extend(subprocess.check_output([ '/usr/bin/paclist', aur_repos],
+                        universal_newlines=True).splitlines())
+                except Exception:
+                    ignlist = ignlist
         return ignlist
 
     def get_upd_pkgs(self):
@@ -172,8 +185,7 @@ class UpdatedPkgs():
             pkgver  = pkginfo['Version']
             # Use pkgname to get the same info from the aurpkgs dictionary
             local_version = self.aurpkgs[pkgname]
-            comp = float(subprocess.check_output(['/usr/bin/vercmp', pkgver,
-                local_version], universal_newlines=True))
+            comp = vercmp(pkgver, local_version)
             if comp > 0.0:
                 add_to_update[pkgname] = {'oldver':local_version, 'newver':pkgver}
         return add_to_update

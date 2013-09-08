@@ -12,4 +12,7 @@ I'm still working on the latter, but it's getting there.
 It also includes a library, `libaur`, that can be imported for use in your
 scripts.
 
+Currently it requres pyalpm, but I'll be adding a non-pyalpm vercmp
+operation soon enough.
+
 .. _cower: https://github.com/falconindy/cower

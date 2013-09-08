@@ -43,6 +43,7 @@ libaur
 ^^^^^^
 * see 'Docs'
 * simple PKGBUILD parsing for *depends, conflicts, provides, etc.
+* Remove subprocesses for 'pacman -Qm' and 'paclist'
 
 Docs
 ^^^^
