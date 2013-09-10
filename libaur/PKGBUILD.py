@@ -46,7 +46,7 @@ SEARCH = {
         'conflicts':re.compile(r'^conflicts=\(([^\)]+)\)', re.M|re.S),
         }
 
-def parse_pkgbuild(pkgbuild):
+def parse_pkgbuild(path=None, full_str=None):
     '''
     Does EXTREMELY BASIC parsing of a PKGBUILD. Only has very basic
     capabilities, and is mostly for finding variables. Also does simple
@@ -56,7 +56,8 @@ def parse_pkgbuild(pkgbuild):
     single string value.
 
     Arguments:
-    pkgbuild (path) -- path to a PKGBUILD file
+    path -- path to a PKGBUILD file
+    full_str -- a single string containing the whole PKGBUILD file
 
     Returns:
     Dictionary
@@ -66,10 +67,18 @@ def parse_pkgbuild(pkgbuild):
             'epoch':['0'], # default to using 0 for an epoch
             }
 
+    # If we're given a path...
+    if path:
+        with open(pkgbuild, "r", encoding='utf8') as pkg:
+            # Create a multi-line string from the pkgbuild
+            our_pkgbuild = pkg.read()
+    # If we're given just the file
+    elif full_str:
+        our_pkgbuild = full_str
+    # If neither are there then just spit out an empty list
+    else:
+        return {}
 
-    with open(pkgbuild, "r", encoding='utf8') as pkg:
-        # Create a multi-line string from the pkgbuild
-        our_pkgbuild = pkg.read()
     # Now operate on our_pkgbuild
     # First go through each search in SEARCH
     for j in SEARCH:
