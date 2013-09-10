@@ -13,6 +13,7 @@ pywer and :mod:`libaur` documentation
    libaur
    libaur.aur
    libaur.printer
+   libaur.PKGBUILD
    libaur.error
    libaur.color
 
