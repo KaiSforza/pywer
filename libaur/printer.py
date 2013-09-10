@@ -8,9 +8,11 @@ from .aur import *
 from os import path
 from subprocess import call,DEVNULL
 import time
+import requests
 from .errors import *
 from .__init__ import __version__
 from .color import Color
+from .PKGBUILD import *
 import re
 
 CATEGORIES = {
@@ -85,7 +87,8 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
         else:
             print(name)
 
-def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False):
+def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
+        more_info=False):
     '''
     Get some simple info from an AUR
 
@@ -94,7 +97,15 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False):
     baseurl (str) -- Where the AUR you are using is located
     ood (bool) -- Whether to show out of date items
     color (bool) -- Whether to use color
+    more_info (bool) -- show more information about packages gathered from a
+                        PKGBUILD
     '''
+    def get_from_dict(put, key):
+        try:
+            info_dict[put] = '{:<15}: '.format(put) + '  '.join(full_info[key])
+        except Exception:
+            info_dict[put] = ''
+
     _color = Color(color)
     json_output = InfoPkg(packages,
             baseurl=baseurl).get_results()
@@ -106,6 +117,19 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False):
 
     for i in range(len(json_output)):
         info_dict = {}
+
+        if more_info:
+            link_to = '{}/packages/{}/{}/PKGBUILD'.format(baseurl,
+                                json_output[i]['Name'][:2], json_output[i]['Name'])
+            pkgbuild = requests.get(link_to)
+            full_info = parse_pkgbuild(full_str=pkgbuild.content.decode())
+            get_from_dict('Depends On', 'depends')
+            get_from_dict('Check Depends', 'checkdepends')
+            get_from_dict('Makedepends', 'makedepends')
+            get_from_dict('Optional Deps', 'optdepends')
+            get_from_dict('Conflicts With', 'conflicts')
+            get_from_dict('Provides', 'provides')
+
         # Out of date or not
         if json_output[i]['OutOfDate'] == 0:
             info_dict['Out Of Date'] = '{:<15}: {}{}{}'.format('Out Of Date',
@@ -148,17 +172,27 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False):
                     json_output[i][field])
         info_dict['Votes'] = '{:<15}: {}'.format(field,
                 json_output[i]['NumVotes'])
-        info_dict['URL'] = '{:<15}: {}{}{}'.format('Version',
+        info_dict['URL'] = '{:<15}: {}{}{}'.format('URL',
                 _color.bold_blue, json_output[i]['URL'], _color.reset)
         info_dict['AUR Page'] = '{:<15}: {}{}/packages/{}{}'.format('AUR Page',
                 _color.bold_blue, baseurl, json_output[i]['Name'], _color.reset)
         info_dict['Category'] = '{:<15}: {}'.format('Category',
                 CATEGORIES[json_output[i]['CategoryID']])
 
-        for field in ['repo', 'Name', 'Version', 'URL', 'AUR Page', 'Category',
+        use_fields = ['repo', 'Name', 'Version', 'URL', 'AUR Page', 'Category',
                 'License', 'Votes', 'Out Of Date', 'Maintainer', 'Submitted',
-                'Last Modified', 'Description']:
-            print(info_dict[field])
+                'Last Modified', 'Description']
+        if more_info:
+            use_fields = ['repo', 'Name', 'Version', 'URL', 'AUR Page',
+                          'Depends On', 'Makedepends', 'Provides',
+                          'Conflicts With', 'Check Depends',
+                          'Optional Deps', 'Category', 'License', 'Votes',
+                          'Out Of Date', 'Maintainer', 'Submitted',
+                          'Last Modified', 'Description']
+
+        for field in use_fields:
+            if info_dict[field]:
+                print(info_dict[field])
 
         print()
 

@@ -14,7 +14,7 @@ pywer
 
   * DONE--download
   * DONE--info (actually done)
-  * --info --info
+  * DONE--info --info
   * DONE--msearch
   * DONE--search
   * DONE--update
@@ -42,7 +42,7 @@ pywer
 libaur
 ^^^^^^
 * see 'Docs'
-* simple PKGBUILD parsing for *depends, conflicts, provides, etc.
+* DONE - simple PKGBUILD parsing for *depends, conflicts, provides, etc.
 * Remove subprocesses for 'pacman -Qm' and 'paclist'
 
 Docs

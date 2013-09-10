@@ -118,8 +118,9 @@ if __name__ == '__main__':
     VERBOSE = args.verbose - args.quiet
 
     if sum([args.search, args.msearch, args.info, args.download,
-            args.update]) > 1:
-        raise error.ArgError('Only one operation allowed')
+            args.update]) != 1:
+        if not args.info == 2:
+            raise error.ArgError('Invalid operation')
 
 
     FORCE=False
@@ -139,8 +140,12 @@ if __name__ == '__main__':
                 baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
                 color=USE_COLOR)
     elif args.info:
-        libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
-                ood=SHOW_OOD, color=USE_COLOR)
+        if args.info > 1:
+            libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
+                    ood=SHOW_OOD, color=USE_COLOR, more_info=True)
+        else:
+            libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
+                    ood=SHOW_OOD, color=USE_COLOR)
     elif args.download:
         if args.target:
             dl_path = path.expanduser(args.target)
@@ -162,6 +167,3 @@ if __name__ == '__main__':
             libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
                     baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
                     color=USE_COLOR)
-
-    else:
-        print('error: No operation specified. (use -h for help)')
