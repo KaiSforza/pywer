@@ -25,6 +25,7 @@ class Color():
             self.bold_magenta = "\x1b[1;35m"
             self.bold_cyan = "\x1b[1;36m"
             self.bold_white = "\x1b[1;37m"
+            self.reset = "\x1b[0m"
 
         else:
             self.black = ""
@@ -45,5 +46,5 @@ class Color():
             self.bold_magenta = ""
             self.bold_cyan = ""
             self.bold_white = ""
+            self.reset = ""
 
-    reset = "\x1b[0m"
