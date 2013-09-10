@@ -100,9 +100,9 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
     more_info (bool) -- show more information about packages gathered from a
                         PKGBUILD
     '''
-    def get_from_dict(put, key):
+    def get_from_dict(put, key, sep):
         try:
-            info_dict[put] = '{:<15}: '.format(put) + '  '.join(full_info[key])
+            info_dict[put] = '{:<15}: '.format(put) + sep.join(full_info[key])
         except Exception:
             info_dict[put] = ''
 
@@ -123,12 +123,12 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
                                 json_output[i]['Name'][:2], json_output[i]['Name'])
             pkgbuild = requests.get(link_to)
             full_info = parse_pkgbuild(full_str=pkgbuild.content.decode())
-            get_from_dict('Depends On', 'depends')
-            get_from_dict('Check Depends', 'checkdepends')
-            get_from_dict('Makedepends', 'makedepends')
-            get_from_dict('Optional Deps', 'optdepends')
-            get_from_dict('Conflicts With', 'conflicts')
-            get_from_dict('Provides', 'provides')
+            get_from_dict('Depends On', 'depends', '  ')
+            get_from_dict('Check Depends', 'checkdepends', '  ')
+            get_from_dict('Makedepends', 'makedepends', '  ')
+            get_from_dict('Optional Deps', 'optdepends', '\n                 ')
+            get_from_dict('Conflicts With', 'conflicts', '  ')
+            get_from_dict('Provides', 'provides', '  ')
 
         # Out of date or not
         if json_output[i]['OutOfDate'] == 0:
