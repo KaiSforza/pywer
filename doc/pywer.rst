@@ -29,7 +29,7 @@ Operations
 
 -i, --info
     Get some basic information on the package(s) specified. Takes one or
-    more targets.
+    more targets. Specify twice to get more information on a package.
 
 -u, --update
     Check for updates on all installed packages or the specified package.
@@ -77,6 +77,10 @@ Options
 
 --baseurl URL
     Specify the location of an alternate AUR.
+
+--dbpath path
+    For ``-u``, you can specify a dbpath on the commandline to override the
+    one in your config file.
 
 Configuration
 -------------
