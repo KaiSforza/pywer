@@ -28,5 +28,6 @@ Submodules
 | :mod:`libaur.aur`
 | :mod:`libaur.printer`
 | :mod:`libaur.PKGBUILD`
+| :mod:`libaur.repo`
 | :mod:`libaur.error`
 | :mod:`libaur.color`
