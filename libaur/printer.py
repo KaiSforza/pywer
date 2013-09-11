@@ -12,6 +12,7 @@ from .errors import *
 from .__init__ import __version__
 from .color import Color
 from .PKGBUILD import *
+from .repo import *
 import re
 
 CATEGORIES = {
@@ -87,7 +88,7 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
             print(name)
 
 def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
-        more_info=False):
+        more_info=False, root='/var/lib/pacman'):
     '''
     Get some simple info from an AUR
 
@@ -98,6 +99,7 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
     color (bool) -- Whether to use color
     more_info (bool) -- show more information about packages gathered from a
                         PKGBUILD
+    root (str) -- path to a pacman dbpath root
     '''
     def get_from_dict(put, key, sep):
         try:
@@ -153,8 +155,9 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
         info_dict['repo'] = '{:<15}: {}{}{}'.format(
                 'Repository', _color.bold_magenta, 'aur', _color.reset)
         # If it's installed, add the [installed] flag to the name
-        if call(['/usr/bin/pacman', '-Qq', json_output[i]['Name']],
-                stdout=DEVNULL, stderr=DEVNULL) == 0:
+        inst_pkgs = get_all_installed_pkgs(root=root)
+        inst_pkgs = set(inst_pkgs.keys())
+        if json_output[i]['Name'] in inst_pkgs:
             installed = ' {}[{}installed{}]{}'.format(
                     _color.bold_blue, _color.bold_green, _color.bold_blue,
                     _color.reset)
