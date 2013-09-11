@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import libaur.aur as libaur
 import libaur.printer
 import libaur.errors as error
 import libaur
@@ -9,7 +8,7 @@ import argparse
 import re
 from os import path
 
-pywer_config_ver = 1
+pywer_config_ver = 2
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -81,6 +80,9 @@ if __name__ == '__main__':
     options.add_argument('--baseurl',
                         help='Set a custom baseurl to an AUR',
                         metavar='url')
+    options.add_argument('--dbpath',
+                        help='Set a custom dbpath (for -u)',
+                        metavar='path')
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
@@ -159,11 +161,17 @@ if __name__ == '__main__':
             repo_ignore = args.ignorerepo
         else:
             repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
+
+        if args.dbpath:
+            ROOT=args.dbpath
+        else:
+            ROOT=config['pacman']['Root']
+
         if args.targ== '-DEFAULT':
             libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
-                    baseurl=_baseurl, be_verbose=VERBOSE,
+                    baseurl=_baseurl, be_verbose=VERBOSE, root=ROOT,
                     color=USE_COLOR)
         else:
             libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
                     baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
-                    color=USE_COLOR)
+                    root=ROOT, color=USE_COLOR)

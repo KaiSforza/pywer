@@ -7,7 +7,6 @@ Has classes for searching, inspecting, and checking for updates.
 Author: William Giokas <1007380@gmail.com>
 '''
 
-import subprocess
 import requests
 import json
 import re
@@ -20,6 +19,7 @@ from pyalpm import vercmp
 
 from .__init__ import __version__
 from .errors import *
+from .repo import *
 
 class SearchPkg(object):
     '''Search for packages on the AUR.'''
@@ -91,7 +91,8 @@ class UpdatedPkgs():
     specified by 'baseurl'.
     '''
     def __init__(self, other_repos=[], pkgs=[],
-            baseurl='https://aur.archlinux.org', ood=True):
+            baseurl='https://aur.archlinux.org', ood=True,
+            root='/var/lib/pacman'):
         '''
         Arguments:
         other_repos=[] -- A list of repos to ignore becuase they contain AUR
@@ -103,7 +104,10 @@ class UpdatedPkgs():
         self.baseurl = baseurl
         self.pkgs = pkgs
         self.other_repos = other_repos
+        self.ign_dbs = [db + '.db' for db in other_repos]
         self.ood = ood
+        self.root = root
+        self.local_pkgs = get_all_installed_pkgs(root = self.root)
 
     def __init_local(self):
         '''
@@ -111,22 +115,18 @@ class UpdatedPkgs():
         See __init_remote__() for pulling package lists from an AUR.
         '''
         if self.pkgs:
-            self.aurlist = self.list_given_pkgs_and_ver()
+            self.aurpkgs = self.list_given_pkgs_and_ver()
         else:
-            # Create a list ['pkgname pkgver']
-            self.aurlist = self.list_unofficial_pkgs()
-            # Append packages from repo to aurlist
-            self.aurlist.extend(self.list_ignored_repo_pkgs())
-        #aurlist.append('pacman-git 4.1.2.r116.gfeb2087-1')
+            # Create a list [('pkgname', 'pkgver')]
+            self.aurpkgs = self.list_unofficial_pkgs()
         # Initialize a list that will be converted to a dictionary later
-        self.aurpkgs = {}
-        # Create a dictionary from the aurpkgs list::
+        #self.aurpkgs = {}
+        # Create a dictionary from the aurlist list::
         #       {'pkg1':'ver1',
         #        'pkg2':'ver2',
         #        ...}
-        for pkg_and_ver in self.aurlist:
-            name, version = re.split(' ', pkg_and_ver)
-            self.aurpkgs[name] = version
+        #for pkg, ver in self.aurlist:
+        #    self.aurpkgs[pkg] = ver
         # Create a list of package names from the keys in the aurpkgs dict:
         #       ['pkg1', 'pkg2', ...]
         self.pkgnames = list(self.aurpkgs.keys())
@@ -138,34 +138,20 @@ class UpdatedPkgs():
         self.all_pkg_info = InfoPkg(self.pkgnames, baseurl=self.baseurl).get_results()
 
     def list_unofficial_pkgs(self):
-        '''list packages with 'pacman -Qm' '''
-        unof = subprocess.check_output(['/usr/bin/pacman', '-Q', '-m'],
-                universal_newlines=True).splitlines()
+        '''list packages with 'foreign packages' in dict'''
+        unof = get_unofficial_pkgs(root=self.root, ign_repos=self.ign_dbs)
         return unof
 
     def list_given_pkgs_and_ver(self):
-        '''list packages in 'pacman -Q' format as specified'''
-        cmd = ['/usr/bin/pacman', '-Q']
-        cmd.extend(self.pkgs)
-        # TODO: Go through a list to simply skip over bad packages?
-        try:
-            givenpkgs = subprocess.check_output(cmd,
-                    universal_newlines=True).splitlines()
-        except Exception:
-            raise Exception('At least one package is invalid.')
+        '''list packages in a dictionary with versions'''
+        givenpkgs = {}
+        for i in self.pkgs:
+            try:
+                givenpkgs[i] = self.local_pkgs[i]
+            except Exception:
+                # Not in a list
+                continue
         return givenpkgs
-
-    def list_ignored_repo_pkgs(self):
-        '''list packages in the other_repos list'''
-        ignlist = []
-        if self.other_repos[0]:
-            for aur_repos in self.other_repos:
-                try:
-                    ignlist.extend(subprocess.check_output([ '/usr/bin/paclist', aur_repos],
-                        universal_newlines=True).splitlines())
-                except Exception:
-                    ignlist = ignlist
-        return ignlist
 
     def get_upd_pkgs(self):
         '''

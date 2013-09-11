@@ -6,7 +6,6 @@ Used to print information from libaur.aur
 
 from .aur import *
 from os import path
-from subprocess import call,DEVNULL
 import time
 import requests
 from .errors import *
@@ -197,7 +196,7 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
         print()
 
 def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
-        be_verbose=0, color=False):
+        be_verbose=0, root='/var/lib/pacman', color=False):
     '''
     Print a list of packages that need updating
 
@@ -207,12 +206,13 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
     baseurl (str) -- Where the AUR you are using is located
     ood (bool) -- Whether to show out of date items
     be_verbose (int) -- Be verbose
+    root (str) -- path to a pacman dbpath
     color (bool) -- Whether to use color
     '''
     _color = Color(color)
     if not isinstance(pkgs, list):
         raise TypeError('Must be a list')
-    a = UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl)
+    a = UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl, root=root)
     upddict = a.get_upd_pkgs()
     if be_verbose > 0:
         for allpkgs in a.pkgnames:
