@@ -60,17 +60,12 @@ The Classes
 
 .. method:: list_unofficial_pkgs()
 
-  Returns a list of unofficial packages using the output of ``pacman -Qm``.
+  Returns a list of unofficial packages and those in the *other_repos* list.
 
 .. method:: list_given_pkgs_and_ver()
 
-  Returns a formatted list of ``['pkgname pkgver', ...]`` for the specified
+  Returns a dictionary of ``{'pkgname': 'pkgver', ...}`` for the specified
   packages in the *pkgs* list.
-
-.. method:: list_ignored_repo_pkgs()
-
-  Returns a list of packages installed from the ignored repostories
-  specified in *other_repos* using ``paclist``
 
 .. method:: get_upd_pkgs()
 

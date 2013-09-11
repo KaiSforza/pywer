@@ -28,11 +28,12 @@ Functions
    *term* is the string to search for. *stype* is the same as
    :class:`libaur.aur.SearchPkg`'s req_type.
 
-.. function:: pretty_print_simple_info(package, baseurl=None, ood = True, color=False)
+.. function:: pretty_print_simple_info(package, baseurl=None, ood = True, color=False, more_info=False)
 
    Prints the results of :class:`libaur.aur.InfoPkg` in human readable
    output, showing all fields but `ID`. *package* is a list of pacakges to
-   get information for.
+   get information for. Setting to *more_info* to True will cause more
+   fields to be printed.
 
 .. function:: pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[], be_verbose=0, color=False)
 
