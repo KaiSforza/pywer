@@ -8,7 +8,7 @@ import argparse
 import re
 from os import path
 
-pywer_config_ver = 2
+pywer_config_ver = 3
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -66,11 +66,8 @@ if __name__ == '__main__':
                         help='Do not ignore out of date packages',
                         action='store_true')
     options.add_argument('-c', '--color',
-                        help='Use color',
-                        action='store_true')
-    options.add_argument('--no-color',
-                        help='Do not use color',
-                        action='store_true')
+                        help='Use color. One of \'always\', \'auto\' or \'never\'',
+                        metavar='when')
     options.add_argument('--ignorerepo',
                         help='Specify comma separated list of repos to ignore',
                         metavar='repo', nargs='+')
@@ -108,16 +105,26 @@ if __name__ == '__main__':
     if args.no_ignore_ood:
         SHOW_OOD=True
 
-    if args.color:
-        USE_COLOR = True
-    elif args.no_color:
-        USE_COLOR = False
-    elif config['Printing']['Color'] == 'yes':
-        USE_COLOR = True
+    if args.color == 'always':
+        USE_COLOR = 2
+    elif args.color == 'auto':
+        USE_COLOR = 1
+    elif args.color == 'never':
+        USE_COLOR = 0
+    elif config['Printing']['Color'] == 'always':
+        USE_COLOR = 2
+    elif config['Printing']['Color'] == 'auto':
+        USE_COLOR = 1
     else:
-        USE_COLOR = False
+        USE_COLOR = 0
 
     VERBOSE = args.verbose - args.quiet
+
+    if args.dbpath:
+        ROOT=args.dbpath
+    else:
+        ROOT=config['pacman']['Root']
+
 
     if sum([args.search, args.msearch, args.info, args.download,
             args.update]) != 1:
@@ -144,10 +151,10 @@ if __name__ == '__main__':
     elif args.info:
         if args.info > 1:
             libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
-                    ood=SHOW_OOD, color=USE_COLOR, more_info=True)
+                    ood=SHOW_OOD, color=USE_COLOR, more_info=True, root=ROOT)
         else:
             libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
-                    ood=SHOW_OOD, color=USE_COLOR)
+                    ood=SHOW_OOD, color=USE_COLOR, root=ROOT)
     elif args.download:
         if args.target:
             dl_path = path.expanduser(args.target)
@@ -161,11 +168,6 @@ if __name__ == '__main__':
             repo_ignore = args.ignorerepo
         else:
             repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
-
-        if args.dbpath:
-            ROOT=args.dbpath
-        else:
-            ROOT=config['pacman']['Root']
 
         if args.targ== '-DEFAULT':
             libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,

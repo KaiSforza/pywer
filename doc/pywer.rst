@@ -63,11 +63,9 @@ Options
 --no-ignore-ood
     The opposite of --ignore-ood
 
--c, --color
-    Use color
-
---no-color
-    Don't use color
+-c when, --color when
+    Use color. One of 'always', 'auto' or 'never'. See config file for
+    setting a default.
 
 --ignorerepo repos
     Ignore the repo or list of repos. Space separated.
