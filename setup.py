@@ -18,4 +18,5 @@ setup(name='pywer',
       install_requires=['requests',
                         'pyxdg'],
       provides=['pywer', __title__],
+      test_suite='test',
       )

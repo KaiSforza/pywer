@@ -3,7 +3,6 @@
 import sys
 import os
 import unittest
-sys.path[0] = os.path.abspath('..')
 
 import libaur.printer as printer
 import libaur.aur as aur
