@@ -6,13 +6,14 @@ the things I still need to add:
 
 pywer
 ^^^^^
-* option flags for overriding certain things such as ignored repos.
-* Only allow a single 'operations' flag to be specified at a time
+* DONE - option flags for overriding certain things such as ignored repos.
+* DONE - Only allow a single 'operations' flag to be specified at a time
 * look through the cower man page. We have a lot of options to add, some
   of which may not be easy. So far I've only gotten the main operations
   in there. (see cower.1 for more info)
 
   * DONE--download
+  * --download --download
   * DONE--info (actually done)
   * DONE--info --info
   * DONE--msearch
@@ -20,7 +21,7 @@ pywer
   * DONE--update
   * --update --download
   * --brief
-  * DONE--color (kind of)
+  * DONE--color
   * --debug
   * DONE--force
   * --format=
