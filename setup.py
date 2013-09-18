@@ -2,14 +2,14 @@
 
 from setuptools import setup
 import sys
-from libaur import __title__,__version__,__author__,__license__
+from libaur import __title__,__version__,__author__,__authoremail__,__license__
 
 setup(name='pywer',
       version=__version__,
       description='A simple python-based AUR helper',
       url='http://git.kaictl.net/wgiokas/pywer.git',
       author=__author__,
-      author_email='1007380@gmail.com',
+      author_email=__authoremail__,
       license=__license__,
       packages=['libaur'],
       scripts=['pywer'],

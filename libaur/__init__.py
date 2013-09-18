@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
-A simple python AUR library
-
+__full_license__ = '''
 MIT/X Consortium License
 
 © 2013-13 William Giokas <1007380@gmail.com>
@@ -26,7 +24,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 '''
 
+__doc__ = '''
+A simple python AUR library
+''' + __full_license__
+
 __title__ = 'libaur'
-__version__ = '0.8'
+__version__ = '0.9'
 __author__ = 'William Giokas'
+__authoremail__ = '1007380@gmail.com'
 __license__ = 'MIT'
