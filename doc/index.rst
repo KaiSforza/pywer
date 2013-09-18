@@ -68,6 +68,6 @@ Indices and tables
 
 .. [1] We only require pyalpm for the use of vercmp. If you have some other
        way of comparing versions that is the same as that of pacman but
-       written in python, or a way to use just pyalpm, please send in a
+       written in python, or a way to use just vercmp, please send in a
        patch. There is a ``libaur.vercmp`` branch to this repository that
        contains tests for a vercmp system.
