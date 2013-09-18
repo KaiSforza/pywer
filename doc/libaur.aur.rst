@@ -8,7 +8,7 @@
 
 This module is used for interacting with the AUR via it's RPC interface.
 There are 4 different classes described in this module, :class:`SearchPkg`,
-:class:`InfoPkg`, :class:`GetPkgs` and :class:`UpatedPkgs`.
+:class:`InfoPkg`, :class:`GetPkgs` and :class:`UpdatedPkgs`.
 
 The Classes
 -----------
