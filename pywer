@@ -33,6 +33,7 @@ import xdg.BaseDirectory
 import argparse
 import re
 from os import path
+from sys import exit
 
 pywer_config_ver = 3
 
@@ -50,7 +51,7 @@ if __name__ == '__main__':
     # TODO: Find some way to only allow a single operation
     parser.add_argument('targ',
                         help='target to perform \'operation\' on',
-                        nargs='*', default='-DEFAULT', metavar='target')
+                        nargs='*', default=None, metavar='target')
     operations = parser.add_argument_group('Operations')
     operations.add_argument('-s', '--search',
                         help='Search for this package',
@@ -167,21 +168,21 @@ if __name__ == '__main__':
     else:
         _baseurl = config['AUR']['BaseUrl']
 
-    if args.search:
+    if args.search and args.targ:
         libaur.printer.pretty_print_search(args.targ, baseurl=_baseurl,
                 ood=SHOW_OOD, be_verbose=VERBOSE, color=USE_COLOR)
-    elif args.msearch:
+    elif args.msearch and args.targ:
         libaur.printer.pretty_print_search(args.targ, stype='msearch',
                 baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
                 color=USE_COLOR)
-    elif args.info:
+    elif args.info and args.targ:
         if args.info > 1:
             libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
                     ood=SHOW_OOD, color=USE_COLOR, more_info=True, root=ROOT)
         else:
             libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
                     ood=SHOW_OOD, color=USE_COLOR, root=ROOT)
-    elif args.download:
+    elif args.download and args.targ:
         if args.target:
             dl_path = path.expanduser(args.target)
         else:
@@ -195,7 +196,7 @@ if __name__ == '__main__':
         else:
             repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
 
-        if args.targ== '-DEFAULT':
+        if not args.targ:
             libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
                     baseurl=_baseurl, be_verbose=VERBOSE, root=ROOT,
                     color=USE_COLOR)
@@ -203,3 +204,6 @@ if __name__ == '__main__':
             libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
                     baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
                     root=ROOT, color=USE_COLOR)
+    else:
+        print('Invalid poeration specified. (Use -h for help)')
+        exit(1)
