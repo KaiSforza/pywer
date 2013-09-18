@@ -11,8 +11,8 @@ Written in python, this project was created to provide a python
 interface to the AUR, and also to emulate cower_ in its options and output.
 I'm still working on the latter, but it's getting there.
 
-It also includes a library, `libaur`, that can be imported for use in your
-scripts.
+It also includes a library, :mod:`libaur`, that can be imported for use in
+your scripts.
 
 Operations
 ----------
