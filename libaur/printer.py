@@ -110,7 +110,7 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
             print(name)
 
 def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
-        more_info=False, root='/var/lib/pacman'):
+        more_info=False, dbpath='/var/lib/pacman'):
     '''
     Get some simple info from an AUR
 
@@ -121,7 +121,7 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
     color (bool) -- Whether to use color
     more_info (bool) -- show more information about packages gathered from a
                         PKGBUILD
-    root (str) -- path to a pacman dbpath root
+    dbpath (str) -- path to a pacman dbpath dbpath
     '''
     def get_from_dict(put, key, sep):
         try:
@@ -177,7 +177,7 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
         info_dict['repo'] = '{:<15}: {}{}{}'.format(
                 'Repository', _color.bold_magenta, 'aur', _color.reset)
         # If it's installed, add the [installed] flag to the name
-        inst_pkgs = get_all_installed_pkgs(root=root)
+        inst_pkgs = get_all_installed_pkgs(dbpath=dbpath)
         inst_pkgs = set(inst_pkgs.keys())
         if json_output[i]['Name'] in inst_pkgs:
             installed = ' {}[{}installed{}]{}'.format(
@@ -221,7 +221,7 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
         print()
 
 def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
-        be_verbose=0, root='/var/lib/pacman', color=False):
+        be_verbose=0, dbpath='/var/lib/pacman', color=False):
     '''
     Print a list of packages that need updating
 
@@ -231,13 +231,13 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
     baseurl (str) -- Where the AUR you are using is located
     ood (bool) -- Whether to show out of date items
     be_verbose (int) -- Be verbose
-    root (str) -- path to a pacman dbpath
+    dbpath (str) -- path to a pacman dbpath
     color (bool) -- Whether to use color
     '''
     _color = Color(color)
     if not isinstance(pkgs, list):
         raise TypeError('Must be a list')
-    a = UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl, root=root)
+    a = UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl, dbpath=dbpath)
     upddict = a.get_upd_pkgs()
     if be_verbose > 0:
         for allpkgs in a.pkgnames:

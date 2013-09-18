@@ -40,7 +40,7 @@ try:
 except ImportError:
     has_pyalpm = False
 
-pywer_config_ver = 3
+pywer_config_ver = 4
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -154,9 +154,9 @@ if __name__ == '__main__':
     VERBOSE = args.verbose - args.quiet
 
     if args.dbpath:
-        ROOT=args.dbpath
+        DBPATH=args.dbpath
     else:
-        ROOT=config['pacman']['Root']
+        DBPATH=config['pacman']['DBPath']
 
 
     if has_pyalpm:
@@ -189,10 +189,10 @@ if __name__ == '__main__':
     elif args.info and args.targ:
         if args.info > 1:
             libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
-                    ood=SHOW_OOD, color=USE_COLOR, more_info=True, root=ROOT)
+                    ood=SHOW_OOD, color=USE_COLOR, more_info=True, dbpath=DBPATH)
         else:
             libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
-                    ood=SHOW_OOD, color=USE_COLOR, root=ROOT)
+                    ood=SHOW_OOD, color=USE_COLOR, dbpath=DBPATH)
     elif args.download and args.targ:
         if args.target:
             dl_path = path.expanduser(args.target)
@@ -210,12 +210,12 @@ if __name__ == '__main__':
 
             if not args.targ:
                 libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
-                        baseurl=_baseurl, be_verbose=VERBOSE, root=ROOT,
+                        baseurl=_baseurl, be_verbose=VERBOSE, dbpath=DBPATH,
                         color=USE_COLOR)
             else:
                 libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
                         baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
-                        root=ROOT, color=USE_COLOR)
+                        dbpath=DBPATH, color=USE_COLOR)
     else:
         print('Invalid poeration specified. (Use -h for help)')
         exit(1)

@@ -111,7 +111,7 @@ try:
         '''
         def __init__(self, other_repos=[], pkgs=[],
                 baseurl='https://aur.archlinux.org', ood=True,
-                root='/var/lib/pacman'):
+                dbpath='/var/lib/pacman'):
             '''
             Arguments:
             other_repos=[] -- A list of repos to ignore becuase they contain AUR
@@ -125,8 +125,8 @@ try:
             self.other_repos = other_repos
             self.ign_dbs = [db + '.db' for db in other_repos]
             self.ood = ood
-            self.root = root
-            self.local_pkgs = get_all_installed_pkgs(root = self.root)
+            self.dbpath = dbpath
+            self.local_pkgs = get_all_installed_pkgs(dbpath = self.dbpath)
 
         def __init_local(self):
             '''
@@ -158,7 +158,7 @@ try:
 
         def list_unofficial_pkgs(self):
             '''list packages with 'foreign packages' in dict'''
-            unof = get_unofficial_pkgs(root=self.root, ign_repos=self.ign_dbs)
+            unof = get_unofficial_pkgs(dbpath=self.dbpath, ign_repos=self.ign_dbs)
             return unof
 
         def list_given_pkgs_and_ver(self):

@@ -87,9 +87,9 @@ def parse_descstring(desc, var):
     return this_dict
 
 
-def get_all_installed_pkgs(root='/var/lib/pacman'):
-    root = root + '/local'
-    dirs = os.listdir(root)
+def get_all_installed_pkgs(dbpath='/var/lib/pacman'):
+    dbpath = dbpath + '/local'
+    dirs = os.listdir(dbpath)
     pattern = re.compile(r'^(.+)-([^-]+-[^-]+)$')
     pkgs = dict()
     for name in dirs:
@@ -99,13 +99,13 @@ def get_all_installed_pkgs(root='/var/lib/pacman'):
     return pkgs
 
 
-def get_all_installed_pkgs_info(root='/var/lib/pacman'):
-    root = root + '/local'
-    dirs = os.listdir(root)
+def get_all_installed_pkgs_info(dbpath='/var/lib/pacman'):
+    dbpath = dbpath + '/local'
+    dirs = os.listdir(dbpath)
     pkgs = dict()
     for i in dirs:
         try:
-            with open('{}/{}/desc'.format(root, i), 'r', encoding='utf8' ) as descfile:
+            with open('{}/{}/desc'.format(dbpath, i), 'r', encoding='utf8' ) as descfile:
                 desc = descfile.read()
             fullinfo = parse_descstring(desc, local_variables)
             pkgs[fullinfo['NAME'][0]] = fullinfo
@@ -115,15 +115,15 @@ def get_all_installed_pkgs_info(root='/var/lib/pacman'):
     return pkgs
 
 
-def get_remote_pkgs(root='/var/lib/pacman', ignore=[]):
-    root = root + '/sync'
-    database_list = [files for files in os.listdir(root) if (re.search('\.db$',
+def get_remote_pkgs(dbpath='/var/lib/pacman', ignore=[]):
+    dbpath = dbpath + '/sync'
+    database_list = [files for files in os.listdir(dbpath) if (re.search('\.db$',
                      files) and files not in ignore)]
     pkgs = dict()
     pattern = re.compile(r'(.+)-([^-]+-[^-]+)/desc$')
     for database in database_list:
         try:
-            with tarfile.open('{}/{}'.format(root, database), 'r') as db:
+            with tarfile.open('{}/{}'.format(dbpath, database), 'r') as db:
                 full_list = db.getnames()
                 for name in full_list:
                     if pattern.search(name):
@@ -134,17 +134,17 @@ def get_remote_pkgs(root='/var/lib/pacman', ignore=[]):
     return pkgs
 
 
-def get_remote_pkgs_info(root='/var/lib/pacman', tmploc='/tmp/pywer',
+def get_remote_pkgs_info(dbpath='/var/lib/pacman', tmploc='/tmp/pywer',
         ignore=[]):
     # Warning, this is really, really slow.
-    root = root + '/sync'
-    database_list = [files for files in os.listdir(root) if re.search('\.db$',
+    dbpath = dbpath + '/sync'
+    database_list = [files for files in os.listdir(dbpath) if re.search('\.db$',
                      files) and files not in ignore]
     pkgs = dict()
     with tempfile.TemporaryDirectory(dir=tmploc) as tmp:
         for database in database_list:
             try:
-                db = tarfile.open('{}/{}'.format(root, database), 'r')
+                db = tarfile.open('{}/{}'.format(dbpath, database), 'r')
                 with tempfile.TemporaryDirectory(dir=tmp) as curtmp:
                     db.extractall(curtmp)
                     db.close()
@@ -161,10 +161,10 @@ def get_remote_pkgs_info(root='/var/lib/pacman', tmploc='/tmp/pywer',
     return pkgs
 
 
-def get_unofficial_pkgs(root='/var/lib/pacman', ign_repos=[]):
-    loc_dict = get_all_installed_pkgs(root=root)
+def get_unofficial_pkgs(dbpath='/var/lib/pacman', ign_repos=[]):
+    loc_dict = get_all_installed_pkgs(dbpath=dbpath)
     loc = set(loc_dict.keys())
-    rem = set(get_remote_pkgs(root=root, ignore=ign_repos).keys())
+    rem = set(get_remote_pkgs(dbpath=dbpath, ignore=ign_repos).keys())
     diff = list(loc.difference(rem))
     ret = {}
     for pkg in diff:
