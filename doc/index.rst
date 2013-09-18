@@ -25,6 +25,24 @@
 pywer and :mod:`libaur` documentation
 =====================================
 
+pywer is a python interface to the `Arch Linux AUR`_. While the defaults
+make it work with ``https://aur.archlinux.org/``, it can also be used with any
+website using the AUR software. It requires `requests`_, `pyxdg`_, and
+`pyalpm`_ [1]_.
+
+While you can use the ``pywer`` script to easily search, introspect or
+update from a terminal, there is also an interface provided in :mod:`libaur`
+for use in your own python programs. It uses python3, though I will accept
+patches for compatability with python2.7+.
+
+This software is licensed by William Giokas under the MIT/X Consortium
+License (See source). A copy of the license must be included when
+distributing this software or any major chunk of this software.
+
+.. _Arch Linux AUR: https://aur.archlinux.org/
+.. _requests: http://python-requests.org
+.. _pyxdg: http://freedesktop.org/Software/pyxdg
+.. _pyalpm: http://projects.archlinux.org/users/remy/pyalpm.git/
 .. toctree::
    :maxdepth: 2
 
@@ -37,8 +55,6 @@ pywer and :mod:`libaur` documentation
    libaur.error
    libaur.color
 
-
-
 Indices and tables
 ==================
 
@@ -46,3 +62,8 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+.. [1] We only require pyalpm for the use of vercmp. If you have some other
+       way of comparing versions that is the same as that of pacman but
+       written in python, or a way to use just pyalpm, please send in a
+       patch. There is a ``libaur.vercmp`` branch to this repository that
+       contains tests for a vercmp system.
