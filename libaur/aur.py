@@ -34,9 +34,6 @@ import distutils.version
 import tarfile
 from os import path
 
-# for comparing versions without vercmp
-from pyalpm import vercmp
-
 from .__init__ import __version__
 from .errors import *
 from .repo import *
@@ -105,93 +102,102 @@ class GetPkgs(InfoPkg):
         with tarfile.open(fileobj=self.stream.raw, mode='r|*') as tar:
             tar.extractall(path=extpath)
 
-class UpdatedPkgs():
-    '''
-    This class is used for grabbing lists of updated packages from the AUR
-    specified by 'baseurl'.
-    '''
-    def __init__(self, other_repos=[], pkgs=[],
-            baseurl='https://aur.archlinux.org', ood=True,
-            root='/var/lib/pacman'):
+try:
+    from pyalpm import vercmp
+    class UpdatedPkgs():
         '''
-        Arguments:
-        other_repos=[] -- A list of repos to ignore becuase they contain AUR
-                    packages. Defaults to an empty list, ignoring no repos.
-        pkgs=[] -- A list of packages to operate on
-        baseurl='https://aur.archlinux.org' -- A string pointing to the
-                    rpc interface for an AUR site.
+        This class is used for grabbing lists of updated packages from the AUR
+        specified by 'baseurl'.
         '''
-        self.baseurl = baseurl
-        self.pkgs = pkgs
-        self.other_repos = other_repos
-        self.ign_dbs = [db + '.db' for db in other_repos]
-        self.ood = ood
-        self.root = root
-        self.local_pkgs = get_all_installed_pkgs(root = self.root)
+        def __init__(self, other_repos=[], pkgs=[],
+                baseurl='https://aur.archlinux.org', ood=True,
+                root='/var/lib/pacman'):
+            '''
+            Arguments:
+            other_repos=[] -- A list of repos to ignore becuase they contain AUR
+                        packages. Defaults to an empty list, ignoring no repos.
+            pkgs=[] -- A list of packages to operate on
+            baseurl='https://aur.archlinux.org' -- A string pointing to the
+                        rpc interface for an AUR site.
+            '''
+            self.baseurl = baseurl
+            self.pkgs = pkgs
+            self.other_repos = other_repos
+            self.ign_dbs = [db + '.db' for db in other_repos]
+            self.ood = ood
+            self.root = root
+            self.local_pkgs = get_all_installed_pkgs(root = self.root)
 
-    def __init_local(self):
-        '''
-        Initializes the lists of packages and dictionaries for local items.
-        See __init_remote__() for pulling package lists from an AUR.
-        '''
-        if self.pkgs:
-            self.aurpkgs = self.list_given_pkgs_and_ver()
-        else:
-            # Create a list [('pkgname', 'pkgver')]
-            self.aurpkgs = self.list_unofficial_pkgs()
-        # Initialize a list that will be converted to a dictionary later
-        #self.aurpkgs = {}
-        # Create a dictionary from the aurlist list::
-        #       {'pkg1':'ver1',
-        #        'pkg2':'ver2',
-        #        ...}
-        #for pkg, ver in self.aurlist:
-        #    self.aurpkgs[pkg] = ver
-        # Create a list of package names from the keys in the aurpkgs dict:
-        #       ['pkg1', 'pkg2', ...]
-        self.pkgnames = list(self.aurpkgs.keys())
+        def __init_local(self):
+            '''
+            Initializes the lists of packages and dictionaries for local items.
+            See __init_remote__() for pulling package lists from an AUR.
+            '''
+            if self.pkgs:
+                self.aurpkgs = self.list_given_pkgs_and_ver()
+            else:
+                # Create a list [('pkgname', 'pkgver')]
+                self.aurpkgs = self.list_unofficial_pkgs()
+            # Initialize a list that will be converted to a dictionary later
+            #self.aurpkgs = {}
+            # Create a dictionary from the aurlist list::
+            #       {'pkg1':'ver1',
+            #        'pkg2':'ver2',
+            #        ...}
+            #for pkg, ver in self.aurlist:
+            #    self.aurpkgs[pkg] = ver
+            # Create a list of package names from the keys in the aurpkgs dict:
+            #       ['pkg1', 'pkg2', ...]
+            self.pkgnames = list(self.aurpkgs.keys())
 
-    def __init_remote(self):
-        '''get json result from a multiinfo request'''
-        # Requires execution of __init_local__()
-        self.__init_local()
-        self.all_pkg_info = InfoPkg(self.pkgnames, baseurl=self.baseurl).get_results()
+        def __init_remote(self):
+            '''get json result from a multiinfo request'''
+            # Requires execution of __init_local__()
+            self.__init_local()
+            self.all_pkg_info = InfoPkg(self.pkgnames, baseurl=self.baseurl).get_results()
 
-    def list_unofficial_pkgs(self):
-        '''list packages with 'foreign packages' in dict'''
-        unof = get_unofficial_pkgs(root=self.root, ign_repos=self.ign_dbs)
-        return unof
+        def list_unofficial_pkgs(self):
+            '''list packages with 'foreign packages' in dict'''
+            unof = get_unofficial_pkgs(root=self.root, ign_repos=self.ign_dbs)
+            return unof
 
-    def list_given_pkgs_and_ver(self):
-        '''list packages in a dictionary with versions'''
-        givenpkgs = {}
-        for i in self.pkgs:
-            try:
-                givenpkgs[i] = self.local_pkgs[i]
-            except Exception:
-                # Not in a list
-                continue
-        return givenpkgs
+        def list_given_pkgs_and_ver(self):
+            '''list packages in a dictionary with versions'''
+            givenpkgs = {}
+            for i in self.pkgs:
+                try:
+                    givenpkgs[i] = self.local_pkgs[i]
+                except Exception:
+                    # Not in a list
+                    continue
+            return givenpkgs
 
-    def get_upd_pkgs(self):
+        def get_upd_pkgs(self):
+            '''
+            Get updated packages
+            Returns: dictionary:
+                {pkgname:{'oldver':installedversion, 'newver':aur_version}, ...}
+            '''
+            self.__init_remote()
+            # Initialize the return list
+            add_to_update = {}
+            # We want to go through each package dictionary returned by InfoPkg
+            for pkginfo in self.all_pkg_info:
+                if not self.ood and pkginfo['OutOfDate'] == 0:
+                    continue
+                # Get the pkgname and pkgver from each package
+                pkgname = pkginfo['Name']
+                pkgver  = pkginfo['Version']
+                # Use pkgname to get the same info from the aurpkgs dictionary
+                local_version = self.aurpkgs[pkgname]
+                comp = vercmp(pkgver, local_version)
+                if comp > 0.0:
+                    add_to_update[pkgname] = {'oldver':local_version, 'newver':pkgver}
+            return add_to_update
+
+except ImportError:
+    class UpdatedPkgs():
         '''
-        Get updated packages
-        Returns: dictionary:
-            {pkgname:{'oldver':installedversion, 'newver':aur_version}, ...}
+        To use the actual UpdatedPkgs we require pyalpm to be installed.
         '''
-        self.__init_remote()
-        # Initialize the return list
-        add_to_update = {}
-        # We want to go through each package dictionary returned by InfoPkg
-        for pkginfo in self.all_pkg_info:
-            if not self.ood and pkginfo['OutOfDate'] == 0:
-                continue
-            # Get the pkgname and pkgver from each package
-            pkgname = pkginfo['Name']
-            pkgver  = pkginfo['Version']
-            # Use pkgname to get the same info from the aurpkgs dictionary
-            local_version = self.aurpkgs[pkgname]
-            comp = vercmp(pkgver, local_version)
-            if comp > 0.0:
-                add_to_update[pkgname] = {'oldver':local_version, 'newver':pkgver}
-        return add_to_update
+        pass

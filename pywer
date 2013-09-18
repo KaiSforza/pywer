@@ -34,6 +34,11 @@ import argparse
 import re
 from os import path
 from sys import exit
+try:
+    import pyalpm
+    has_pyalpm = True
+except ImportError:
+    has_pyalpm = False
 
 pywer_config_ver = 3
 
@@ -62,9 +67,10 @@ if __name__ == '__main__':
     operations.add_argument('-m', '--msearch',
                         help='Search for this maintainers packages',
                         action='count', default=0)
-    operations.add_argument('-u', '--update',
-                        help='Print package updates for the system',
-                        action='count', default=0)
+    if has_pyalpm:
+        operations.add_argument('-u', '--update',
+                            help='Print package updates for the system',
+                            action='count', default=0)
     operations.add_argument('-d', '--download',
                         help='Download the package',
                         action='count', default=0)
@@ -153,8 +159,13 @@ if __name__ == '__main__':
         ROOT=config['pacman']['Root']
 
 
-    if sum([args.search, args.msearch, args.info, args.download,
-            args.update]) != 1:
+    if has_pyalpm:
+        arg_count = sum([args.search, args.msearch, args.info, args.download,
+                args.update])
+    else:
+        arg_count = sum([args.search, args.msearch, args.info, args.download])
+
+    if arg_count != 1:
         if not args.info == 2:
             raise error.ArgError('Invalid operation')
 
@@ -190,20 +201,21 @@ if __name__ == '__main__':
         dl_path = path.expandvars(dl_path)
         libaur.printer.download_pkgs(args.targ, dl_path, dl_verbose=VERBOSE,
                 baseurl=_baseurl, dl_force=FORCE, ood=SHOW_OOD, color=USE_COLOR)
-    if args.update:
-        if args.ignorerepo:
-            repo_ignore = args.ignorerepo
-        else:
-            repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
+    elif has_pyalpm:
+        if args.update:
+            if args.ignorerepo:
+                repo_ignore = args.ignorerepo
+            else:
+                repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
 
-        if not args.targ:
-            libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
-                    baseurl=_baseurl, be_verbose=VERBOSE, root=ROOT,
-                    color=USE_COLOR)
-        else:
-            libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
-                    baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
-                    root=ROOT, color=USE_COLOR)
+            if not args.targ:
+                libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
+                        baseurl=_baseurl, be_verbose=VERBOSE, root=ROOT,
+                        color=USE_COLOR)
+            else:
+                libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
+                        baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
+                        root=ROOT, color=USE_COLOR)
     else:
         print('Invalid poeration specified. (Use -h for help)')
         exit(1)

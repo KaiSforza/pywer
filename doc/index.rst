@@ -27,8 +27,9 @@ pywer and :mod:`libaur` documentation
 
 pywer is a python interface to the `Arch Linux AUR`_. While the defaults
 make it work with ``https://aur.archlinux.org/``, it can also be used with any
-website using the AUR software. It requires `requests`_, `pyxdg`_, and
-`pyalpm`_ [1]_.
+website using the AUR software. It requires `requests`_ and `pyxdg`_. You
+can optionally include `pyalpm`_ [1]_ to check for updates and the like.
+Everything else will work without `pyalpm`_ just fine.
 
 While you can use the ``pywer`` script to easily search, introspect or
 update from a terminal, there is also an interface provided in :mod:`libaur`
