@@ -27,7 +27,8 @@ DEALINGS IN THE SOFTWARE.
 '''
 
 from .aur import *
-from os import path
+from os import path,popen
+import sys
 import time
 import requests
 from .errors import *
@@ -36,6 +37,7 @@ from .color import Color
 from .PKGBUILD import *
 from .repo import *
 import re
+import textwrap
 
 CATEGORIES = {
         1: 'None',
@@ -59,6 +61,22 @@ CATEGORIES = {
         19:'kernels',
         }
 
+def _get_term_width():
+    '''
+    Determine terminal width using os.popen, fall back on 78. If we're not
+    dealing with a tty, then don't word wrap (nothing should be longer than
+    2^32 on the AUR)
+    '''
+    if not sys.stdout.isatty():
+        return 2**32
+    try:
+        a, termwidth = popen('stty size', 'r').read().split()
+        termwidth = int(termwidth)
+    except OSError:
+        termwidth = 78
+    return termwidth
+
+
 def pretty_print_search(term, stype='search', baseurl=None, ood=True,
         be_verbose=0, color=False):
     '''
@@ -72,6 +90,9 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     be_verbose (int) -- Be verbose
     color (bool) -- Whether to use color
     '''
+    tw = _get_term_width()
+    wrapper = textwrap.TextWrapper(initial_indent='    ',
+            subsequent_indent='    ', break_on_hyphens=False, width=(tw - 4))
     _color = Color(color)
     json_output = SearchPkg(term, baseurl=baseurl,
             req_type=stype).get_results()
@@ -86,12 +107,12 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
         name = json_output[i]['Name']
         version = json_output[i]['Version']
         numvotes = json_output[i]['NumVotes']
-        description = json_output[i]['Description']
         is_ood = json_output[i]['OutOfDate']
+        description = wrapper.fill(json_output[i]['Description'])
 
         if be_verbose >= 0:
             if json_output[i]['OutOfDate'] == 0:
-                print('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n    {3}'.format(
+                print('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.format(
                     name, version, numvotes, description,
                     _color.bold_magenta, _color.bold, _color.bold_green,
                     _color.reset))
@@ -99,12 +120,12 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
                 if not ood:
                     continue
                 if color:
-                    print('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n    {3}'.format(
+                    print('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.format(
                         name, version, numvotes, description,
                         _color.bold_magenta, _color.bold, _color.bold_red,
                         _color.reset))
                 else:
-                    print('aur/{} {} <!> ({})\n    {}'.format(
+                    print('aur/{} {} <!> ({})\n{}'.format(
                         name, version, numvotes, description))
         else:
             print(name)
@@ -123,12 +144,17 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
                         PKGBUILD
     dbpath (str) -- path to a pacman dbpath dbpath
     '''
-    def get_from_dict(put, key, sep):
+    tw = _get_term_width()
+    wrapper = textwrap.TextWrapper(initial_indent='',
+            subsequent_indent='                 ', break_on_hyphens=False,
+            width=(tw - 17))
+    def _get_from_dict(put, key, sep):
         try:
-            info_dict[put] = '{:<15}: '.format(put) + sep.join(full_info[key])
+            info_dict[put] = wrapper.fill(sep.join(full_info[key]))
         except Exception:
             info_dict[put] = ''
 
+    to_print = ''
     _color = Color(color)
     json_output = InfoPkg(packages,
             baseurl=baseurl).get_results()
@@ -146,25 +172,31 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
                                 json_output[i]['Name'][:2], json_output[i]['Name'])
             pkgbuild = requests.get(link_to)
             full_info = parse_pkgbuild(full_str=pkgbuild.content.decode())
-            get_from_dict('Depends On', 'depends', '  ')
-            get_from_dict('Check Depends', 'checkdepends', '  ')
-            get_from_dict('Makedepends', 'makedepends', '  ')
-            get_from_dict('Optional Deps', 'optdepends', '\n                 ')
-            get_from_dict('Conflicts With', 'conflicts', '  ')
-            get_from_dict('Provides', 'provides', '  ')
+            _get_from_dict('Depends On', 'depends', '  ')
+            _get_from_dict('Check Depends', 'checkdepends', '  ')
+            _get_from_dict('Makedepends', 'makedepends', '  ')
+            _get_from_dict('Conflicts With', 'conflicts', '  ')
+            _get_from_dict('Provides', 'provides', '  ')
 
-        # Out of date or not
+        # Special handling for optdepends
+        try:
+            info_dict['Optional Deps'] = \
+                    '\n                 '.join(full_info['optdepends'])
+        except Exception:
+            info_dict['Optional Deps'] = ''
+
+        # Out of date or not, and since when
         if json_output[i]['OutOfDate'] == 0:
-            info_dict['Out Of Date'] = '{:<15}: {}{}{}'.format('Out Of Date',
-                    _color.bold_green, 'No', _color.reset)
+            info_dict['Out Of Date'] = '{}{}{}'.format(_color.bold_green, 'No',
+                    _color.reset)
         else:
             if not ood:
                 continue
             oodtime = time.ctime(json_output[i]['OutOfDate'] + time.timezone
                     - tzdiff)
-            info_dict['Out Of Date'] = '{:<15}: {}{}{} (since {})'\
-                    .format('Out Of Date', 
-                    _color.bold_red, 'Yes', _color.reset, oodtime)
+            info_dict['Out Of Date'] = '{}{}{} (since {})'\
+                    .format(_color.bold_red, 'Yes', _color.reset, oodtime)
+
         # Format the date fields using 'time'
         for field in ['FirstSubmitted', 'LastModified']:
             if field == 'FirstSubmitted':
@@ -172,10 +204,9 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
             else:
                 pretty_field = 'Last Modified'
             sec_time = json_output[i][field]
-            info_dict[pretty_field] = '{:<15}: {}'.format(pretty_field,
-                    time.ctime(json_output[i][field] + time.timezone - tzdiff))
-        info_dict['repo'] = '{:<15}: {}{}{}'.format(
-                'Repository', _color.bold_magenta, 'aur', _color.reset)
+            info_dict[pretty_field] = time.ctime(json_output[i][field] +
+                    time.timezone - tzdiff)
+
         # If it's installed, add the [installed] flag to the name
         inst_pkgs = get_all_installed_pkgs(dbpath=dbpath)
         inst_pkgs = set(inst_pkgs.keys())
@@ -185,40 +216,54 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
                     _color.reset)
         else:
             installed = ''
-        info_dict['Name'] = '{:<15}: {}{}{}{}'.format('Name', _color.bold,
+        info_dict['Name'] = '{}{}{}{}'.format(_color.bold,
                 json_output[i]['Name'], _color.reset, installed)
-        # Get the easy, plain strings
-        info_dict['Version'] = '{:<15}: {}{}{}'.format('Version',
-                _color.bold_green, json_output[i]['Version'], _color.reset)
-        for field in ['URL', 'License', 'Maintainer',
-                'Description']:
-            info_dict[field] = '{:<15}: {}'.format(field,
-                    json_output[i][field])
-        info_dict['Votes'] = '{:<15}: {}'.format(field,
-                json_output[i]['NumVotes'])
-        info_dict['URL'] = '{:<15}: {}{}{}'.format('URL',
-                _color.bold_blue, json_output[i]['URL'], _color.reset)
-        info_dict['AUR Page'] = '{:<15}: {}{}/packages/{}{}'.format('AUR Page',
-                _color.bold_blue, baseurl, json_output[i]['Name'], _color.reset)
-        info_dict['Category'] = '{:<15}: {}'.format('Category',
-                CATEGORIES[json_output[i]['CategoryID']])
 
-        use_fields = ['repo', 'Name', 'Version', 'URL', 'AUR Page', 'Category',
+        # Get the easy, plain strings
+        info_dict['Version'] = '{}{}{}'.format(_color.bold_green,
+                json_output[i]['Version'], _color.reset)
+
+        # Some simple strings we can get and wrap
+        for field in ['URL', 'License', 'Description']:
+            info_dict[field] = wrapper.fill(json_output[i][field])
+
+        # If maintainer is None, then we should set it to (orphan)
+        info_dict['Maintainer'] = json_output[i]['Maintainer']
+        if not info_dict['Maintainer']:
+            info_dict['Maintainer'] = '(orphan)'
+
+        # Color the repo name and URLs
+        info_dict['Repository'] = '{}{}{}'.format( _color.bold_magenta, 'aur',
+                _color.reset)
+        info_dict['URL'] = '{}{}{}'.format(_color.bold_blue,
+                json_output[i]['URL'], _color.reset)
+        info_dict['AUR Page'] = '{}{}/packages/{}{}'.format(_color.bold_blue,
+                baseurl, json_output[i]['Name'], _color.reset)
+        # Get the category name
+        info_dict['Category'] = CATEGORIES[json_output[i]['CategoryID']]
+        info_dict['Votes'] = json_output[i]['NumVotes']
+
+        use_fields = ['Repository', 'Name', 'Version', 'URL', 'AUR Page', 'Category',
                 'License', 'Votes', 'Out Of Date', 'Maintainer', 'Submitted',
                 'Last Modified', 'Description']
         if more_info:
-            use_fields = ['repo', 'Name', 'Version', 'URL', 'AUR Page',
+            use_fields = ['Repository', 'Name', 'Version', 'URL', 'AUR Page',
                           'Depends On', 'Makedepends', 'Provides',
                           'Conflicts With', 'Check Depends',
                           'Optional Deps', 'Category', 'License', 'Votes',
                           'Out Of Date', 'Maintainer', 'Submitted',
                           'Last Modified', 'Description']
 
+        # Add a blank line between results
+        if to_print:
+            to_print += '\n'
+        # Build the final string to be printed out, prefixing the value by a
+        # 17-character width name + :<space>
         for field in use_fields:
             if info_dict[field]:
-                print(info_dict[field])
+                to_print += '{:<15}: {}\n'.format(field, info_dict[field])
 
-        print()
+    print(to_print)
 
 def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
         be_verbose=0, dbpath='/var/lib/pacman', color=False):
