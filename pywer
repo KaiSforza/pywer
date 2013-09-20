@@ -201,21 +201,20 @@ if __name__ == '__main__':
         dl_path = path.expandvars(dl_path)
         libaur.printer.download_pkgs(args.targ, dl_path, dl_verbose=VERBOSE,
                 baseurl=_baseurl, dl_force=FORCE, ood=SHOW_OOD, color=USE_COLOR)
-    elif has_pyalpm:
-        if args.update:
-            if args.ignorerepo:
-                repo_ignore = args.ignorerepo
-            else:
-                repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
+    elif has_pyalpm and args.update:
+        if args.ignorerepo:
+            repo_ignore = args.ignorerepo
+        else:
+            repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
 
-            if not args.targ:
-                libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
-                        baseurl=_baseurl, be_verbose=VERBOSE, dbpath=DBPATH,
-                        color=USE_COLOR)
-            else:
-                libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
-                        baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
-                        dbpath=DBPATH, color=USE_COLOR)
+        if not args.targ:
+            libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
+                    baseurl=_baseurl, be_verbose=VERBOSE, dbpath=DBPATH,
+                    color=USE_COLOR)
+        else:
+            libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
+                    baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
+                    dbpath=DBPATH, color=USE_COLOR)
     else:
         print('Invalid operation specified. (Use -h for help)')
         exit(1)
