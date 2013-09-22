@@ -24,7 +24,7 @@ pywer
   * DONE--color
   * --debug
   * DONE--force
-  * --format=
+  * DONE--format=
   * --ignore=
   * DONE--ignorerepo[=]
   * --listdelim
