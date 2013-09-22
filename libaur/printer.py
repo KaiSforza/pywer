@@ -61,6 +61,40 @@ CATEGORIES = {
         19:'kernels',
         }
 
+FORMAT_STRINGS = {
+        'a':'LastModified',
+        'c':'CategoryID',
+        'd':'Description',
+        'i':'ID',
+        'l':'License',
+        'm':'Maintainer',
+        'n':'Name',
+        'o':'NumVotes',
+        'p':'URLPath',
+        's':'FirstSubmitted',
+        't':'OutOfDate',
+        'u':'URL',
+        'v':'Version',
+        '%':'%',
+        }
+
+INFO_FORMAT_STRINGS = {
+        'p':'AUR Page', # Replaces URLPath
+        'S':'Submitted',
+        'A':'Last Modified', # Times in nice format
+        'T':'OutOfDate',
+        }
+
+INFO_INFO_FORMAT_STRINGS = { # Added stuff for full info stuff
+        'C':'Conflicts With',
+        'D':'Depends On',
+        'M':'Makedepends',
+        'O':'Optional Deps',
+        'P':'Provides',
+        'R':'Replaces',
+        }
+
+
 def _get_term_width():
     '''
     Determine terminal width using os.popen, fall back on 78. If we're not
@@ -78,7 +112,7 @@ def _get_term_width():
 
 
 def pretty_print_search(term, stype='search', baseurl=None, ood=True,
-        be_verbose=0, color=False):
+        be_verbose=0, color=False, format_str=None):
     '''
     Print out search results
 
@@ -89,6 +123,7 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     ood (bool) -- Whether to show out of date items
     be_verbose (int) -- Be verbose
     color (bool) -- Whether to use color
+    format_str (str) -- A string for the format printing
     '''
     tw = _get_term_width()
     wrapper = textwrap.TextWrapper(initial_indent='    ',
@@ -96,42 +131,52 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     _color = Color(color)
     json_output = SearchPkg(term, baseurl=baseurl,
             req_type=stype).get_results()
+    print_str = ''
+    if format_str:
+        f = FORMAT_STRINGS.copy()
+        fmt_replace = re.compile(r'%(' + '|'.join(f) + '){1}')
     for i in range(len(json_output)):
-        if json_output[i]['OutOfDate'] == 0:
+        this_pkg = json_output[i].copy()
+        if this_pkg['OutOfDate'] == 0:
             is_ood = ''
         else:
             if not ood:
                 continue
             else:
                 is_ood = '<!> '
-        name = json_output[i]['Name']
-        version = json_output[i]['Version']
-        numvotes = json_output[i]['NumVotes']
-        is_ood = json_output[i]['OutOfDate']
-        description = wrapper.fill(json_output[i]['Description'])
+        name = this_pkg['Name']
+        version = this_pkg['Version']
+        numvotes = this_pkg['NumVotes']
+        is_ood = this_pkg['OutOfDate']
+        description = wrapper.fill(this_pkg['Description'])
 
         if be_verbose >= 0:
-            if json_output[i]['OutOfDate'] == 0:
-                print('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.format(
-                    name, version, numvotes, description,
-                    _color.bold_magenta, _color.bold, _color.bold_green,
-                    _color.reset))
+            if format_str:
+                print_str += fmt_replace.sub(lambda x:
+                        str(this_pkg[f[x.group(1)]]), format_str)
             else:
-                if not ood:
-                    continue
-                if color:
-                    print('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.format(
+                if this_pkg['OutOfDate'] == 0:
+                    print_str += '{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}\n'.format(
                         name, version, numvotes, description,
-                        _color.bold_magenta, _color.bold, _color.bold_red,
-                        _color.reset))
+                        _color.bold_magenta, _color.bold, _color.bold_green,
+                        _color.reset)
                 else:
-                    print('aur/{} {} <!> ({})\n{}'.format(
-                        name, version, numvotes, description))
+                    if not ood:
+                        continue
+                    if color:
+                        print_str += '{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}\n'.format(
+                            name, version, numvotes, description,
+                            _color.bold_magenta, _color.bold, _color.bold_red,
+                            _color.reset)
+                    else:
+                        print_str += 'aur/{} {} <!> ({})\n{}\n'.format(
+                            name, version, numvotes, description)
         else:
-            print(name)
+            print_str += name
+    print(print_str)
 
-def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
-        more_info=False, dbpath='/var/lib/pacman'):
+def pretty_print_info(packages, baseurl=None, ood=True, color=False,
+        more_info=False, dbpath='/var/lib/pacman', format_str=None):
     '''
     Get some simple info from an AUR
 
@@ -143,6 +188,7 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
     more_info (bool) -- show more information about packages gathered from a
                         PKGBUILD
     dbpath (str) -- path to a pacman dbpath dbpath
+    format_str (str) -- A string for the format printing
     '''
     tw = _get_term_width()
     wrapper = textwrap.TextWrapper(initial_indent='',
@@ -150,11 +196,19 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
             width=(tw - 17))
     def _get_from_dict(put, key, sep):
         try:
-            info_dict[put] = wrapper.fill(sep.join(full_info[key]))
+            info_dict[put] = sep.join(full_info[key])
         except Exception:
             info_dict[put] = ''
 
     to_print = ''
+    f = FORMAT_STRINGS.copy()
+    f.update(INFO_FORMAT_STRINGS)
+    if more_info:
+        f.update(INFO_INFO_FORMAT_STRINGS)
+
+    # Don't use the fancy colors with format strings
+    if format_str and color != 2:
+        color = 0
     _color = Color(color)
     json_output = InfoPkg(packages,
             baseurl=baseurl).get_results()
@@ -165,7 +219,7 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
         tzdiff = 0
 
     for i in range(len(json_output)):
-        info_dict = {}
+        info_dict = json_output[i].copy()
 
         if more_info:
             link_to = '{}/packages/{}/{}/PKGBUILD'.format(baseurl,
@@ -225,7 +279,7 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
 
         # Some simple strings we can get and wrap
         for field in ['URL', 'License', 'Description']:
-            info_dict[field] = wrapper.fill(json_output[i][field])
+            info_dict[field] = json_output[i][field]
 
         # If maintainer is None, then we should set it to (orphan)
         info_dict['Maintainer'] = json_output[i]['Maintainer']
@@ -254,14 +308,21 @@ def pretty_print_simple_info(packages, baseurl=None, ood=True, color=False,
                           'Out Of Date', 'Maintainer', 'Submitted',
                           'Last Modified', 'Description']
 
-        # Add a blank line between results
-        if to_print:
-            to_print += '\n'
-        # Build the final string to be printed out, prefixing the value by a
-        # 17-character width name + :<space>
-        for field in use_fields:
-            if info_dict[field]:
-                to_print += '{:<15}: {}\n'.format(field, info_dict[field])
+        if not format_str:
+            # Add a blank line between results
+            if to_print:
+                to_print += '\n'
+            # Build the final string to be printed out, prefixing the value by a
+            # 17-character width name + :<space>
+            for field in use_fields:
+                if info_dict[field]:
+                    to_print += '{:<15}: {}\n'.format(field,
+                            wrapper.fill(str(info_dict[field])))
+        else:
+            info_dict['%'] = '%'
+            fmt_replace = re.compile(r'%(' + '|'.join(f) + '){1}')
+            to_print += fmt_replace.sub(lambda x:
+                    str(info_dict[f[x.group(1)]]), format_str)
 
     print(to_print)
 

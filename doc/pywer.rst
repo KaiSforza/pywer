@@ -80,6 +80,92 @@ Options
     For ``-u``, you can specify a dbpath on the commandline to override the
     one in your config file.
 
+--format fmt
+    Specify a format string to print out. See below for a list of keys.
+
+Formats
+-------
+
+When you use *--format*, then you can specify certain parts of the json
+dictionary to print, such as:
+
+%a
+    last modified
+
+%c
+    category
+
+%d
+    description
+
+%i
+    id
+
+%l
+    license
+
+%m
+    maintainer
+
+%n
+    name
+
+%o
+    votes
+
+%p
+    AUR page
+
+%s
+    submission date
+
+%t
+    out of date time
+
+%u
+    project URL
+
+%v
+    version
+
+%%
+    a literal %
+
+When using *--info*, there are two new date specifiers that are formatted
+nicely for human readability.
+
+%S
+    submission date, human readable
+
+%A
+    last modified, human readable
+
+%T
+    out of date as a date
+
+When *--info* is specified twice, the following formatters are also
+available (if the PKGBUILD specifies them).
+
+%C
+    conflicts
+
+%D
+    depends
+
+%M
+    makedepends
+
+%O
+    optdepends
+
+%P
+    provides
+
+%R
+    replaces
+
+
+
 Configuration
 -------------
 
