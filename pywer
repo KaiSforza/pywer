@@ -113,6 +113,9 @@ if __name__ == '__main__':
     options.add_argument('--dbpath',
                         help='Set a custom dbpath (for -u)',
                         metavar='path')
+    options.add_argument('--format',
+                        help='Print with specified format (see docs)',
+                        metavar='fmt', default=None)
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
@@ -181,18 +184,21 @@ if __name__ == '__main__':
 
     if args.search and args.targ:
         libaur.printer.pretty_print_search(args.targ, baseurl=_baseurl,
-                ood=SHOW_OOD, be_verbose=VERBOSE, color=USE_COLOR)
+                ood=SHOW_OOD, be_verbose=VERBOSE, color=USE_COLOR,
+                format_str=args.format)
     elif args.msearch and args.targ:
         libaur.printer.pretty_print_search(args.targ, stype='msearch',
                 baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
-                color=USE_COLOR)
+                color=USE_COLOR, format_str=args.format)
     elif args.info and args.targ:
         if args.info > 1:
-            libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
-                    ood=SHOW_OOD, color=USE_COLOR, more_info=True, dbpath=DBPATH)
+            libaur.printer.pretty_print_info(args.targ, baseurl=_baseurl,
+                    ood=SHOW_OOD, color=USE_COLOR, more_info=True,
+                    dbpath=DBPATH, format_str=args.format)
         else:
-            libaur.printer.pretty_print_simple_info(args.targ, baseurl=_baseurl,
-                    ood=SHOW_OOD, color=USE_COLOR, dbpath=DBPATH)
+            libaur.printer.pretty_print_info(args.targ, baseurl=_baseurl,
+                    ood=SHOW_OOD, color=USE_COLOR, dbpath=DBPATH,
+                    format_str=args.format)
     elif args.download and args.targ:
         if args.target:
             dl_path = path.expanduser(args.target)
