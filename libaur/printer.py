@@ -131,7 +131,7 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     _color = Color(color)
     json_output = SearchPkg(term, baseurl=baseurl,
             req_type=stype).get_results()
-    print_str = ''
+    print_list = []
     if format_str:
         f = FORMAT_STRINGS.copy()
         fmt_replace = re.compile(r'%(' + '|'.join(f) + '){1}')
@@ -152,28 +152,29 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
 
         if be_verbose >= 0:
             if format_str:
-                print_str += fmt_replace.sub(lambda x:
-                        str(this_pkg[f[x.group(1)]]), format_str)
+                print_list.append(fmt_replace.sub(lambda x:
+                        str(this_pkg[f[x.group(1)]]), format_str))
             else:
                 if this_pkg['OutOfDate'] == 0:
-                    print_str += '{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}\n'.format(
-                        name, version, numvotes, description,
-                        _color.bold_magenta, _color.bold, _color.bold_green,
-                        _color.reset)
+                    print_list.append('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.\
+                            format( name, version, numvotes, description,
+                            _color.bold_magenta, _color.bold, _color.bold_green,
+                            _color.reset))
                 else:
                     if not ood:
                         continue
                     if color:
-                        print_str += '{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}\n'.format(
-                            name, version, numvotes, description,
-                            _color.bold_magenta, _color.bold, _color.bold_red,
-                            _color.reset)
+                        print_list.append('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.format(
+                                name, version, numvotes, description,
+                                _color.bold_magenta, _color.bold,
+                                _color.bold_red, _color.reset))
                     else:
-                        print_str += 'aur/{} {} <!> ({})\n{}\n'.format(
-                            name, version, numvotes, description)
+                        print_list.append('aur/{} {} <!> ({})\n{}'.format(
+                            name, version, numvotes, description))
+
         else:
-            print_str += name
-    print(print_str)
+            print_list.append(name)
+    print('\n'.join(print_list))
 
 def pretty_print_info(packages, baseurl=None, ood=True, color=False,
         more_info=False, dbpath='/var/lib/pacman', format_str=None):
@@ -200,7 +201,7 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
         except Exception:
             info_dict[put] = ''
 
-    to_print = ''
+    print_list = []
     f = FORMAT_STRINGS.copy()
     f.update(INFO_FORMAT_STRINGS)
     if more_info:
@@ -309,22 +310,21 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
                           'Last Modified', 'Description']
 
         if not format_str:
-            # Add a blank line between results
-            if to_print:
-                to_print += '\n'
             # Build the final string to be printed out, prefixing the value by a
             # 17-character width name + :<space>
+            print_str = ''
             for field in use_fields:
                 if info_dict[field]:
-                    to_print += '{:<15}: {}\n'.format(field,
+                    print_str += '{:<15}: {}\n'.format(field,
                             wrapper.fill(str(info_dict[field])))
+            print_list.append(print_str)
         else:
             info_dict['%'] = '%'
             fmt_replace = re.compile(r'%(' + '|'.join(f) + '){1}')
-            to_print += fmt_replace.sub(lambda x:
-                    str(info_dict[f[x.group(1)]]), format_str)
+            print_list.append(fmt_replace.sub(lambda x:
+                    str(info_dict[f[x.group(1)]]), format_str))
 
-    print(to_print)
+    print('\n'.join(print_list))
 
 def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
         be_verbose=0, dbpath='/var/lib/pacman', color=False):
