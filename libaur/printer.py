@@ -132,7 +132,9 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     json_output = SearchPkg(term, baseurl=baseurl,
             req_type=stype).get_results()
     print_list = []
+    sep = '\n'
     if format_str:
+        sep = ''
         f = FORMAT_STRINGS.copy()
         fmt_replace = re.compile(r'%(' + '|'.join(f) + '){1}')
     for i in range(len(json_output)):
@@ -174,7 +176,8 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
 
         else:
             print_list.append(name)
-    print('\n'.join(print_list))
+    print(sep.join(print_list))
+
 
 def pretty_print_info(packages, baseurl=None, ood=True, color=False,
         more_info=False, dbpath='/var/lib/pacman', format_str=None):
@@ -208,7 +211,9 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
         f.update(INFO_INFO_FORMAT_STRINGS)
 
     # Don't use the fancy colors with format strings
+    sep = '\n'
     if format_str and color != 2:
+        sep = ''
         color = 0
     _color = Color(color)
     json_output = InfoPkg(packages,
@@ -265,7 +270,7 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
         # If it's installed, add the [installed] flag to the name
         inst_pkgs = get_all_installed_pkgs(dbpath=dbpath)
         inst_pkgs = set(inst_pkgs.keys())
-        if json_output[i]['Name'] in inst_pkgs:
+        if json_output[i]['Name'] in inst_pkgs and not format_str:
             installed = ' {}[{}installed{}]{}'.format(
                     _color.bold_blue, _color.bold_green, _color.bold_blue,
                     _color.reset)
@@ -310,13 +315,17 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
                           'Last Modified', 'Description']
 
         if not format_str:
-            # Build the final string to be printed out, prefixing the value by a
-            # 17-character width name + :<space>
+            # Build the final string to be printed out, prefixing the value by
+            # a 17-character width name + :<space>
             print_str = ''
             for field in use_fields:
                 if info_dict[field]:
-                    print_str += '{:<15}: {}\n'.format(field,
-                            wrapper.fill(str(info_dict[field])))
+                    if field != 'Optional Deps':
+                        print_str += '{:<15}: {}\n'.format(field,
+                                wrapper.fill(str(info_dict[field])))
+                    else:
+                        print_str += '{:<15}: {}\n'.format(field,
+                                str(info_dict[field]))
             print_list.append(print_str)
         else:
             info_dict['%'] = '%'
@@ -324,7 +333,9 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
             print_list.append(fmt_replace.sub(lambda x:
                     str(info_dict[f[x.group(1)]]), format_str))
 
-    print('\n'.join(print_list))
+    print(sep.join(print_list))
+
+
 
 def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
         be_verbose=0, dbpath='/var/lib/pacman', color=False):
