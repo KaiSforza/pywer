@@ -159,14 +159,15 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
             else:
                 if this_pkg['OutOfDate'] == 0:
                     print_list.append('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.\
-                            format( name, version, numvotes, description,
-                            _color.bold_magenta, _color.bold, _color.bold_green,
-                            _color.reset))
+                            format(name, version, numvotes, description,
+                            _color.bold_magenta, _color.bold,
+                            _color.bold_green, _color.reset))
                 else:
                     if not ood:
                         continue
                     if color:
-                        print_list.append('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.format(
+                        print_list.append(
+                                '{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.format(
                                 name, version, numvotes, description,
                                 _color.bold_magenta, _color.bold,
                                 _color.bold_red, _color.reset))
@@ -229,7 +230,8 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
 
         if more_info:
             link_to = '{}/packages/{}/{}/PKGBUILD'.format(baseurl,
-                                json_output[i]['Name'][:2], json_output[i]['Name'])
+                                json_output[i]['Name'][:2],
+                                json_output[i]['Name'])
             pkgbuild = requests.get(link_to)
             full_info = parse_pkgbuild(full_str=pkgbuild.content.decode())
             _get_from_dict('Depends On', 'depends', '  ')
@@ -240,8 +242,8 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
 
         # Special handling for optdepends
         try:
-            info_dict['Optional Deps'] = \
-                    '\n                 '.join(full_info['optdepends'])
+            info_dict['Optional Deps'] = (
+                    '\n                 '.join(full_info['optdepends']))
         except Exception:
             info_dict['Optional Deps'] = ''
 
@@ -303,9 +305,9 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
         info_dict['Category'] = CATEGORIES[json_output[i]['CategoryID']]
         info_dict['Votes'] = json_output[i]['NumVotes']
 
-        use_fields = ['Repository', 'Name', 'Version', 'URL', 'AUR Page', 'Category',
-                'License', 'Votes', 'Out Of Date', 'Maintainer', 'Submitted',
-                'Last Modified', 'Description']
+        use_fields = ['Repository', 'Name', 'Version', 'URL', 'AUR Page',
+                'Category', 'License', 'Votes', 'Out Of Date', 'Maintainer',
+                'Submitted', 'Last Modified', 'Description']
         if more_info:
             use_fields = ['Repository', 'Name', 'Version', 'URL', 'AUR Page',
                           'Depends On', 'Makedepends', 'Provides',
@@ -356,6 +358,7 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
         raise TypeError('Must be a list')
     a = UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl, dbpath=dbpath)
     upddict = a.get_upd_pkgs()
+
     if be_verbose > 0:
         for allpkgs in a.pkgnames:
             print('{3}::{7} Checking {4}{0}{7} for updates...'.format(
@@ -370,6 +373,7 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
                 _color.bold_green, _color.reset))
         else:
             print(pkgs)
+
 
 def download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None,
         dl_force=False, ood=True, color=False):
@@ -394,7 +398,8 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None,
             continue
         pkgver = _a.json_output[i]['Version']
         if path.exists('{}/{}'.format(dl_path, pkgname)) and not dl_force:
-            raise FileExists('{}::{} {}/{} already exists. Use --force to overwrite'\
+            raise FileExists(
+                    '{}::{} {}/{} already exists. Use --force to overwrite'\
                     .format(_color.bold_red, _color.reset,
                             dl_path, pkgname))
         _a.get_stream(i)
