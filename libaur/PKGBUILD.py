@@ -133,7 +133,7 @@ def parse_pkgbuild(path=None, full_str=None):
 
     # Use this to find bash variables that we can parse and replace
     bash_vars = re.compile(r'\$\{?(' + '|'.join(pkg_dict.keys()) +
-            r')(?!\[[0-9]*\])\}?')
+            r')(?!\[[0-9]*\]){1}\}?')
 
     # Now that we have gotten a finished product in pkg_dict, we need to do the
     # var substitution,
