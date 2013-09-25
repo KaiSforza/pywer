@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 import io
 import re
+import shlex
 
 # All of the variables available in a PKGBUILD
 VARIABLES = [
@@ -91,7 +92,7 @@ def parse_pkgbuild(path=None, full_str=None):
 
     # If we're given a path...
     if path:
-        with open(pkgbuild, "r", encoding='utf8') as pkg:
+        with open(path, "r", encoding='utf8') as pkg:
             # Create a multi-line string from the pkgbuild
             our_pkgbuild = pkg.read()
     # If we're given just the file
@@ -116,16 +117,15 @@ def parse_pkgbuild(path=None, full_str=None):
             newmatch = []
             # Go through each line in our match, cleaning up along the way
             for lines in match:
-                # Remove quotation marks from the outside, usually enough.
-                strip_chars = lines.strip('\'" \t,')
                 # If anything is started by a '#' but is not part of a VCS
                 # fragment, then remove it from the final product.
-                no_comments = re.sub('#(?!revision|branch|tag|commit).*$', '', strip_chars)
+                no_comments = re.sub('#(?!revision|branch|tag|commit).*$', '',
+                        lines)
                 # If the line still has something on it...
                 if len(no_comments) > 0:
                     # Split up the words in the middle parens for single-line
                     # bash arrays
-                    split_arrays = re.split('''['"]\s+['"]''', no_comments)
+                    split_arrays = shlex.split(no_comments)
                     # Tack the new array we got to the end of newmatch
                     newmatch.extend(split_arrays)
             # Assign the newmatch array to the right spot.
