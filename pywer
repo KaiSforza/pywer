@@ -218,5 +218,6 @@ if __name__ == '__main__':
                     baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
                     dbpath=DBPATH, color=USE_COLOR)
     else:
-        print('Invalid operation specified. (Use -h for help)')
+        if VERBOSE >= 0:
+            print('Invalid operation specified. (Use -h for help)')
         exit(1)
