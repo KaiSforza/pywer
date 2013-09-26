@@ -51,6 +51,7 @@ cgit.
 .. toctree::
    :maxdepth: 2
 
+   install
    pywer
    libaur
    libaur.aur
