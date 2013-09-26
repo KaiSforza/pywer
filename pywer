@@ -136,7 +136,6 @@ if __name__ == '__main__':
         raise error.ConfigMissing(message)
 
     SHOW_OOD = not config['Repos'].getboolean('IgnoreOOD')
-    print(SHOW_OOD)
 
     if args.color == 'always':
         USE_COLOR = 2
