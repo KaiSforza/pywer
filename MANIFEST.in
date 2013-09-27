@@ -1,5 +1,6 @@
 include pywer.ini
 include LICENSE
+include _pywer
 include doc/*.rst
 include doc/conf.py
 include doc/Makefile

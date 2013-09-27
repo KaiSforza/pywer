@@ -15,4 +15,8 @@ scripts.
 Currently it requres pyalpm, but I'll be adding a non-pyalpm vercmp
 operation soon enough.
 
+ZSH completion is included in the sdist tarball, but is not installed by
+setup.py. If you want to install it, you can manually put it where it is
+needed.
+
 .. _cower: https://github.com/falconindy/cower
