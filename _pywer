@@ -1,0 +1,116 @@
+#compdef pywer
+
+# Shamelessly taken from falconindy's cower
+
+typeset -A opt_args
+
+_cower_opts_commands=(
+  '-d[Download target(s)]'
+  '-i[Show info for target(s)]'
+  '-m[Show packages maintained by target(s)]'
+  '-s[Search for target(s)]'
+  '-u[Check for updates against AUR]'
+  '-h[Display usage]'
+)
+
+_cower_opts_general=(
+  '*-f[Overwrite existing files when downloading]'
+  #'*--ignore[Ignore a package upgrade]:package:
+  #        _cower_completions_installed_packages'
+  '--ignorerepo[Ignore some or all binary repos]:repositories:
+          _cower_completions_repositories'
+  {-t,--target}'[Specify an alternate download directory]:target:_files -/'
+  '--config[Specify an alternat config file]:config:_files'
+  {-o,--ignore-ood}'[Ignore out of date packages]'
+  '--baseurl[Specify a custom url to an AUR]'
+  '--dbpath[Specify a custom dbpath (for -u)]:dbpath:_files -/'
+  #'--threads[Limit number of threads created]:number of threads'
+  #'--timeout[Specify connection timeout in seconds]:timeout'
+  #'--sort[Sort results in ascending order by key]:key:_cower_completions_key'
+  #'--rsort[Sort results in descending order by key]:key:_cower_completions_key'
+)
+
+_cower_opts_output=(
+'-c[Use colored output]:when:(auto always never)'
+  #'--debug[Show debug output]'
+  '-q[Output less]'
+  '-v[Output more]'
+)
+
+_cower_action_none() {
+  _arguments -s -w : \
+    "$_cower_opts_commands[@]"
+}
+
+# provides completions for installed packages
+_cower_completions_installed_packages() {
+  local -a cmd packages packages_long
+  packages_long=(/var/lib/pacman/local/*(/))
+  packages=( ${${packages_long#/var/lib/pacman/local/}%-*-*} )
+  compadd "$@" -a packages
+}
+
+_cower_completions_repositories() {
+  local -a cmd repositories
+  repositories=(${(o)${${${(M)${(f)"$(</etc/pacman.conf)"}:#\[*}/\[/}/\]/}:#options})
+  # Uniq the array
+  typeset -U repositories
+  compadd "$@" -a repositories
+}
+
+_cower_completions_aur() {
+  local -a aur_packages
+  aur_packages=($(_call_program packages $service -sq $words[CURRENT] 2>/dev/null))
+  compadd "$@" -a aur_packages
+}
+
+_cower_completions_format() {
+  arguments=(%c %d %i %l %n %o %p %t %u %v %%)
+  if [[ $words = *-i*i* ]]; then
+    arguments+=(%C %D %M %O %P %R)
+  fi
+  compadd "$@" -a arguments
+}
+
+_cower_completions_key() {
+  local -a keys
+  keys=('firstsubmitted' 'lastmodified' 'license' 'maintainer' 'name' 'outofdate' 'version' 'votes')
+  compadd "$@" -a keys
+}
+
+_cower() {
+  case $words[2] in
+    -[ms]*) _arguments -s -w : \
+      "$_cower_opts_general[@]" \
+      "$_cower_opts_output[@]" \
+      '--format[Print package output according to format string]:string:
+          _cower_completions_format'
+      ;;
+    -i*) _arguments -s -w : \
+      "$_cower_opts_general[@]" \
+      "$_cower_opts_output[@]" \
+      '*-i[Show more info]' \
+      '*:package:_cower_completions_aur' \
+      '--format[Print package output according to format string]:string:
+          _cower_completions_format'
+      #'--listdelim[Change list format delimeter]' \
+      ;;
+    -d*) _arguments -s -w : \
+      "$_cower_opts_general[@]" \
+      "$_cower_opts_output[@]" \
+      '*-d[Download AUR dependencies]' \
+      '*:package:_cower_completions_aur'
+      ;;
+    -u*) _arguments -s -w : \
+      "$_cower_opts_general[@]" \
+      "$_cower_opts_output[@]" \
+      '*-d[Download updates]' \
+      ;;
+    -) _cower_action_none ;;
+    *) return 1 ;;
+  esac
+}
+
+_cower "$@"
+
+# vim: set et sw=2 ts=2 ft=zsh :
