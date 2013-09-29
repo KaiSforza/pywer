@@ -31,43 +31,7 @@ DEALINGS IN THE SOFTWARE.
 import io
 import re
 import shlex
-
-# All of the variables available in a PKGBUILD
-VARIABLES = [
-        # String variables
-        'pkgver', 'pkgrel', 'pkgdesc', 'url', 'epoch', 'pkgbase',
-        # Bash Array variables
-        'pkgname', 'license', 'source', 'groups', 'arch', 'depends',
-        'makedepends', 'checkdepends', 'optdepends', 'options', 'backup',
-        'provides', 'replaces', 'conflicts',
-        ]
-
-SEARCH = {
-        # Mostly single line variables
-        # Note, most of these won't get anything if they are part of an 'if'
-        # statement in the PKGBUILD.
-        'pkgver':re.compile(r'^\s*pkgver=([^ \n]+)', re.M|re.S),
-        'pkgrel':re.compile(r'^\s*pkgrel=([^ \n]+)', re.M|re.S),
-        'epoch':re.compile(r'^\s*epoch=([^ \n]+)', re.M|re.S),
-        'url':re.compile(r'^\s*url=([^ \n]+)', re.M|re.S),
-        'pkgdesc':re.compile(r'^\s*pkgdesc=([^\n]+)', re.M|re.S),
-        'pkgbase':re.compile(r'^\s*pkgbase=([^ \n]+)', re.M|re.S),
-        # Array vareable finding and parsing. Possibly multi-line
-        'pkgname':re.compile(r'^\s*pkgname=\(?([^\)\n]+)[)\n]', re.M|re.S),
-        'license':re.compile(r'^\s*license=\(([^\)]+)\)', re.M|re.S),
-        'depends':re.compile(r'^\s*depends=\(([^\)]+)\)', re.M|re.S),
-        'makedepends':re.compile(r'^\s*makedepends=\(([^\)]+)\)', re.M|re.S),
-        'checkdepends':re.compile(r'^\s*checkdepends=\(([^\)]+)\)', re.M|re.S),
-        'optdepends':re.compile(r'^\s*optdepends=\(([^\)]+)\)', re.M|re.S),
-        'source':re.compile(r'^\s*source=\(([^\)]+)\)', re.M|re.S),
-        'groups':re.compile(r'^\s*groups=\(([^\)]+)\)', re.M|re.S),
-        'arch':re.compile(r'^\s*arch=\(([^\)]+)\)', re.M|re.S),
-        'options':re.compile(r'^\s*options=\(([^\)]+)\)', re.M|re.S),
-        'backup':re.compile(r'^\s*backup=\(([^\)]+)\)', re.M|re.S),
-        'provides':re.compile(r'^\s*provides=\(([^\)]+)\)', re.M|re.S),
-        'replaces':re.compile(r'^\s*replaces=\(([^\)]+)\)', re.M|re.S),
-        'conflicts':re.compile(r'^\s*conflicts=\(([^\)]+)\)', re.M|re.S),
-        }
+from .data import PB_SEARCH as SEARCH,PB_VARIABLES as VARIABLES
 
 def parse_pkgbuild(path=None, full_str=None):
     '''

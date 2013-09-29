@@ -36,64 +36,12 @@ from .__init__ import __version__
 from .color import Color
 from .PKGBUILD import *
 from .repo import *
+from .data import PRINTER_CATEGORIES as CATEGORIES
+from .data import PRINAUR_FORMAT_STRINGS as FORMAT_STRINGS
+from .data import PRINAUR_INFO_FORMAT_STRINGS as INFO_FORMAT_STRINGS
+from .data import PRINAUR_INFO_INFO_FORMAT_STRINGS as INFO_INFO_FORMAT_STRINGS
 import re
 import textwrap
-
-CATEGORIES = {
-        1: 'None',
-        2: 'daemons',
-        3: 'devel',
-        4: 'editors',
-        5: 'emulators',
-        6: 'games',
-        7: 'gnome',
-        8: 'i18n',
-        9: 'kde',
-        10:'lib',
-        11:'modules',
-        12:'multimedia',
-        13:'network',
-        14:'office',
-        15:'science',
-        16:'system',
-        17:'X11',
-        18:'xfce',
-        19:'kernels',
-        }
-
-FORMAT_STRINGS = {
-        'a':'LastModified',
-        'c':'CategoryID',
-        'd':'Description',
-        'i':'ID',
-        'l':'License',
-        'm':'Maintainer',
-        'n':'Name',
-        'o':'NumVotes',
-        'p':'URLPath',
-        's':'FirstSubmitted',
-        't':'OutOfDate',
-        'u':'URL',
-        'v':'Version',
-        '%':'%',
-        }
-
-INFO_FORMAT_STRINGS = {
-        'p':'AUR Page', # Replaces URLPath
-        'S':'Submitted',
-        'A':'Last Modified', # Times in nice format
-        'T':'OutOfDate',
-        }
-
-INFO_INFO_FORMAT_STRINGS = { # Added stuff for full info stuff
-        'C':'Conflicts With',
-        'D':'Depends On',
-        'M':'Makedepends',
-        'O':'Optional Deps',
-        'P':'Provides',
-        'R':'Replaces',
-        }
-
 
 def _get_term_width():
     '''
