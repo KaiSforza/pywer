@@ -85,7 +85,7 @@ if __name__ == '__main__':
                         action='count', default=0)
     options.add_argument('-f', '--force',
                         help='overwrite existing files while downloading',
-                        action='store_true')
+                        action='store_true', default=False)
     options.add_argument('--config',
                         help='Specify an alternate config',
                         metavar='file')
@@ -168,10 +168,7 @@ if __name__ == '__main__':
         if not args.info == 2:
             raise error.ArgError('Invalid operation')
 
-
-    FORCE=False
-    if args.force:
-        FORCE=True
+    FORCE=args.force
 
     if args.baseurl:
         _baseurl = args.baseurl
