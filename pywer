@@ -167,6 +167,9 @@ if __name__ == '__main__':
     if arg_count != 1:
         if not args.info == 2:
             raise error.ArgError('Invalid operation')
+    # We cannot have certain args run without a target
+    elif (args.search or args.msearch or args.info) and not args.targ:
+        raise error.ArgError('Invalid opertaion')
 
     FORCE=args.force
 
