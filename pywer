@@ -40,7 +40,6 @@ try:
 except ImportError:
     has_pyalpm = False
 
-pywer_config_ver = 4
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -124,10 +123,6 @@ if __name__ == '__main__':
     else:
         use_config = xdg.BaseDirectory.xdg_config_home + '/pywer/pywer.ini'
     config.read(use_config)
-
-    if pywer_config_ver != config.getint('PYWER', 'CONFIGVER'):
-        raise error.ConfigWrongVersion('''Your pywer config is for an older
-        version of pywer. Please see the file in $PREFIX/share/doc/pywer.''')
 
 
     if not path.exists(use_config):
