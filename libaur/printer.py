@@ -122,6 +122,10 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
         else:
             print_list.append(name)
     print(sep.join(print_list))
+    if len(print_list) < 1:
+        return False
+    else:
+        return True
 
 
 def pretty_print_info(packages, baseurl=None, ood=True, color=False,
@@ -280,6 +284,10 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
                     str(info_dict[f[x.group(1)]]), format_str))
 
     print(sep.join(print_list))
+    if len(print_list) < 1:
+        return False
+    else:
+        return True
 
 
 
@@ -302,6 +310,8 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
         raise TypeError('Must be a list')
     a = aur.UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl, dbpath=dbpath)
     upddict = a.get_upd_pkgs()
+    if len(upddict.keys()) < 1:
+        return False
 
     if be_verbose > 0:
         for allpkgs in a.pkgnames:
@@ -317,6 +327,7 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
                 _color.bold_green, _color.reset))
         else:
             print(pkgs)
+    return True
 
 
 def download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None,
@@ -334,6 +345,9 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None,
     _color = colorlib.Color(color)
     _a = aur.GetPkgs(list_of_pkgs, baseurl=baseurl)
     _a.get_results()
+    if len(_a.json_output) < 1:
+        return False
+
     for i in range(len(_a.json_output)):
         pkgname = _a.json_output[i]['Name']
         if not _a.json_output[i]['OutOfDate'] == 0 and not ood:
@@ -352,3 +366,4 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None,
             print('{2}::{4} {3}{0}{4} downloaded to {1}'.format(
                 pkgname, dl_path,
                 _color.bold_blue, _color.bold, _color.reset))
+    return True

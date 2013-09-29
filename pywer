@@ -174,20 +174,20 @@ if __name__ == '__main__':
         _baseurl = config['AUR']['BaseUrl']
 
     if args.search and args.targ:
-        libaur.printer.pretty_print_search(args.targ, baseurl=_baseurl,
+        ret = libaur.printer.pretty_print_search(args.targ, baseurl=_baseurl,
                 ood=SHOW_OOD, be_verbose=VERBOSE, color=USE_COLOR,
                 format_str=args.format)
     elif args.msearch and args.targ:
-        libaur.printer.pretty_print_search(args.targ, stype='msearch',
+        ret = libaur.printer.pretty_print_search(args.targ, stype='msearch',
                 baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
                 color=USE_COLOR, format_str=args.format)
     elif args.info and args.targ:
         if args.info > 1:
-            libaur.printer.pretty_print_info(args.targ, baseurl=_baseurl,
+            ret = libaur.printer.pretty_print_info(args.targ, baseurl=_baseurl,
                     ood=SHOW_OOD, color=USE_COLOR, more_info=True,
                     dbpath=DBPATH, format_str=args.format)
         else:
-            libaur.printer.pretty_print_info(args.targ, baseurl=_baseurl,
+            ret = libaur.printer.pretty_print_info(args.targ, baseurl=_baseurl,
                     ood=SHOW_OOD, color=USE_COLOR, dbpath=DBPATH,
                     format_str=args.format)
     elif args.download and args.targ:
@@ -196,7 +196,7 @@ if __name__ == '__main__':
         else:
             dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
         dl_path = path.expandvars(dl_path)
-        libaur.printer.download_pkgs(args.targ, dl_path, dl_verbose=VERBOSE,
+        ret = libaur.printer.download_pkgs(args.targ, dl_path, dl_verbose=VERBOSE,
                 baseurl=_baseurl, dl_force=FORCE, ood=SHOW_OOD, color=USE_COLOR)
     elif has_pyalpm and args.update:
         if args.ignorerepo:
@@ -205,14 +205,17 @@ if __name__ == '__main__':
             repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
 
         if not args.targ:
-            libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
+            ret = libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
                     baseurl=_baseurl, be_verbose=VERBOSE, dbpath=DBPATH,
                     color=USE_COLOR)
         else:
-            libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
+            ret = libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
                     baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
                     dbpath=DBPATH, color=USE_COLOR)
     else:
         if VERBOSE >= 0:
             print('Invalid operation specified. (Use -h for help)')
+        exit(1)
+
+    if not ret:
         exit(1)
