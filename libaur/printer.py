@@ -26,20 +26,16 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 '''
 
-from .aur import *
 from os import path,popen
 import sys
 import time
 import requests
-from .errors import *
+from . import aur,repo,PKGBUILD,errors,color as colorlib
 from .__init__ import __version__
-from .color import Color
-from .PKGBUILD import *
-from .repo import *
 from .data import PRINTER_CATEGORIES as CATEGORIES
-from .data import PRINAUR_FORMAT_STRINGS as FORMAT_STRINGS
-from .data import PRINAUR_INFO_FORMAT_STRINGS as INFO_FORMAT_STRINGS
-from .data import PRINAUR_INFO_INFO_FORMAT_STRINGS as INFO_INFO_FORMAT_STRINGS
+from .data import PRINTER_FORMAT_STRINGS as FORMAT_STRINGS
+from .data import PRINTER_INFO_FORMAT_STRINGS as INFO_FORMAT_STRINGS
+from .data import PRINTER_INFO_INFO_FORMAT_STRINGS as INFO_INFO_FORMAT_STRINGS
 import re
 import textwrap
 
@@ -76,8 +72,8 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     tw = _get_term_width()
     wrapper = textwrap.TextWrapper(initial_indent='    ',
             subsequent_indent='    ', break_on_hyphens=False, width=(tw - 4))
-    _color = Color(color)
-    json_output = SearchPkg(term, baseurl=baseurl,
+    _color = colorlib.Color(color)
+    json_output = aur.SearchPkg(term, baseurl=baseurl,
             req_type=stype).get_results()
     print_list = []
     sep = '\n'
@@ -164,8 +160,8 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
     if format_str and color != 2:
         sep = ''
         color = 0
-    _color = Color(color)
-    json_output = InfoPkg(packages,
+    _color = colorlib.Color(color)
+    json_output = aur.InfoPkg(packages,
             baseurl=baseurl).get_results()
     localized = time.localtime()
     if localized.tm_isdst == 1:
@@ -181,7 +177,7 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
                                 json_output[i]['Name'][:2],
                                 json_output[i]['Name'])
             pkgbuild = requests.get(link_to)
-            full_info = parse_pkgbuild(full_str=pkgbuild.content.decode())
+            full_info = PKGBUILD.parse_pkgbuild(full_str=pkgbuild.content.decode())
             _get_from_dict('Depends On', 'depends', '  ')
             _get_from_dict('Check Depends', 'checkdepends', '  ')
             _get_from_dict('Makedepends', 'makedepends', '  ')
@@ -218,7 +214,7 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
                     time.timezone - tzdiff)
 
         # If it's installed, add the [installed] flag to the name
-        inst_pkgs = get_all_installed_pkgs(dbpath=dbpath)
+        inst_pkgs = repo.get_all_installed_pkgs(dbpath=dbpath)
         inst_pkgs = set(inst_pkgs.keys())
         if json_output[i]['Name'] in inst_pkgs and not format_str:
             installed = ' {}[{}installed{}]{}'.format(
@@ -301,10 +297,10 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
     dbpath (str) -- path to a pacman dbpath
     color (bool) -- Whether to use color
     '''
-    _color = Color(color)
+    _color = colorlib.Color(color)
     if not isinstance(pkgs, list):
         raise TypeError('Must be a list')
-    a = UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl, dbpath=dbpath)
+    a = aur.UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl, dbpath=dbpath)
     upddict = a.get_upd_pkgs()
 
     if be_verbose > 0:
@@ -335,8 +331,8 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None,
     ood (bool) -- Whether to show out of date items
     color (bool) -- Whether to use color
     '''
-    _color = Color(color)
-    _a = GetPkgs(list_of_pkgs, baseurl=baseurl)
+    _color = colorlib.Color(color)
+    _a = aur.GetPkgs(list_of_pkgs, baseurl=baseurl)
     _a.get_results()
     for i in range(len(_a.json_output)):
         pkgname = _a.json_output[i]['Name']
@@ -346,7 +342,7 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None,
             continue
         pkgver = _a.json_output[i]['Version']
         if path.exists('{}/{}'.format(dl_path, pkgname)) and not dl_force:
-            raise FileExists(
+            raise errors.FileExists(
                     '{}::{} {}/{} already exists. Use --force to overwrite'\
                     .format(_color.bold_red, _color.reset,
                             dl_path, pkgname))

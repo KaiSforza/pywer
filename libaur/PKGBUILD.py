@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 import io
 import re
 import shlex
-from .data import PB_SEARCH as SEARCH,PB_VARIABLES as VARIABLES
+from .data import PB_SEARCH as SEARCH
 
 def parse_pkgbuild(path=None, full_str=None):
     '''

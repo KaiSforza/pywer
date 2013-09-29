@@ -35,8 +35,7 @@ import tarfile
 from os import path
 
 from .__init__ import __version__
-from .errors import *
-from .repo import *
+from . import repo
 
 class SearchPkg(object):
     '''Search for packages on the AUR.'''
@@ -126,7 +125,7 @@ try:
             self.ign_dbs = [db + '.db' for db in other_repos]
             self.ood = ood
             self.dbpath = dbpath
-            self.local_pkgs = get_all_installed_pkgs(dbpath = self.dbpath)
+            self.local_pkgs = repo.get_all_installed_pkgs(dbpath = self.dbpath)
 
         def __init_local(self):
             '''
@@ -158,7 +157,8 @@ try:
 
         def list_unofficial_pkgs(self):
             '''list packages with 'foreign packages' in dict'''
-            unof = get_unofficial_pkgs(dbpath=self.dbpath, ign_repos=self.ign_dbs)
+            unof = repo.get_unofficial_pkgs(dbpath=self.dbpath,
+                    ign_repos=self.ign_dbs)
             return unof
 
         def list_given_pkgs_and_ver(self):
