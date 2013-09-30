@@ -93,3 +93,45 @@ PRINTER_INFO_INFO_FORMAT_STRINGS = { # Added stuff for full info stuff
         'P':'Provides',
         'R':'Replaces',
         }
+
+REPO_LOCAL_VARIABLES = [
+                   'NAME',
+                   'VERSION',
+                   'BASE',
+                   'DESC',
+                   'URL',
+                   'ARCH',
+                   'BUILDDATE',
+                   'INSTALLDATE',
+                   'PACKAGER',
+                   'SIZE',
+                   'DEPENDS',
+                   'LICENSE',
+                   'VALIDATION',
+                   'REPLACES',
+                   'OPTDEPENDS',
+                   'CONFLICTS',
+                   'PROVIDES'
+                   ]
+
+REPO_SYNC_VARIABLES = [
+                  'FILENAME',
+                  'NAME',
+                  'BASE',
+                  'VERSION',
+                  'DESC',
+                  'CSIZE',
+                  'ISIZE',
+                  'URL',
+                  'LICENSE',
+                  'ARCH',
+                  'BUILDDATE',
+                  'PACKAGER',
+                  'REPLACES',
+                  # In the desc file
+                  'DEPENDS',
+                  'CONFLICTS',
+                  'PROVIDES',
+                  'OPTDEPENDS',
+                  'MAKEDEPENDS',
+                  ]

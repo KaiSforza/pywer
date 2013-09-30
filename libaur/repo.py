@@ -30,48 +30,8 @@ import os
 import re
 import tarfile
 import tempfile
+from .data import REPO_LOCAL_VARIABLES,REPO_SYNC_VARIABLES
 
-local_variables = [
-                   'NAME',
-                   'VERSION',
-                   'BASE',
-                   'DESC',
-                   'URL',
-                   'ARCH',
-                   'BUILDDATE',
-                   'INSTALLDATE',
-                   'PACKAGER',
-                   'SIZE',
-                   'DEPENDS',
-                   'LICENSE',
-                   'VALIDATION',
-                   'REPLACES',
-                   'OPTDEPENDS',
-                   'CONFLICTS',
-                   'PROVIDES'
-                   ]
-
-sync_variables = [
-                  'FILENAME',
-                  'NAME',
-                  'BASE',
-                  'VERSION',
-                  'DESC',
-                  'CSIZE',
-                  'ISIZE',
-                  'URL',
-                  'LICENSE',
-                  'ARCH',
-                  'BUILDDATE',
-                  'PACKAGER',
-                  'REPLACES',
-                  # In the desc file
-                  'DEPENDS',
-                  'CONFLICTS',
-                  'PROVIDES',
-                  'OPTDEPENDS',
-                  'MAKEDEPENDS',
-                  ]
 
 def parse_descstring(desc, var):
     this_dict = dict()
@@ -107,7 +67,7 @@ def get_all_installed_pkgs_info(dbpath='/var/lib/pacman'):
         try:
             with open('{}/{}/desc'.format(dbpath, i), 'r', encoding='utf8' ) as descfile:
                 desc = descfile.read()
-            fullinfo = parse_descstring(desc, local_variables)
+            fullinfo = parse_descstring(desc, REPO_LOCAL_VARIABLES)
             pkgs[fullinfo['NAME'][0]] = fullinfo
         except Exception:
             continue
@@ -153,7 +113,8 @@ def get_remote_pkgs_info(dbpath='/var/lib/pacman', tmploc='/tmp/pywer',
                         with open(curtmp + '/' + rawdesc + '/desc') as desc:
                             with open(curtmp + '/' + rawdesc + '/depends') as deps:
                                 fulldesc = desc.read() + deps.read()
-                                fullinfo = parse_descstring(fulldesc, sync_variables)
+                                fullinfo = parse_descstring(
+                                        fulldesc, REPO_SYNC_VARIABLES)
                                 pkgs[fullinfo['NAME'][0]] = fullinfo
             except Exception:
                 continue
