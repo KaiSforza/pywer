@@ -173,6 +173,9 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
     else:
         tzdiff = 0
 
+    inst_pkgs = repo.get_all_installed_pkgs(dbpath=dbpath)
+    inst_pkgs = set(inst_pkgs.keys())
+
     for i in range(len(json_output)):
         info_dict = json_output[i].copy()
 
@@ -218,8 +221,6 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
                     time.timezone - tzdiff)
 
         # If it's installed, add the [installed] flag to the name
-        inst_pkgs = repo.get_all_installed_pkgs(dbpath=dbpath)
-        inst_pkgs = set(inst_pkgs.keys())
         if json_output[i]['Name'] in inst_pkgs and not format_str:
             installed = ' {}[{}installed{}]{}'.format(
                     _color.bold_blue, _color.bold_green, _color.bold_blue,
