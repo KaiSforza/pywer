@@ -1,11 +1,10 @@
 :mod:`libaur`
 =============
 
-.. |synopsis| replace:: A python interface to an Arch User Repository.
 .. module:: libaur
-   :synopsis: |synopsis|
+   :synopsis: A python interface to an Arch User Repository.
 
-|synopsis|
+A python interface to an Arch User Repository.
 
 The library behind pywer_.
 
@@ -31,3 +30,4 @@ Submodules
 | :mod:`libaur.repo`
 | :mod:`libaur.error`
 | :mod:`libaur.color`
+| :mod:`libaur.data`

@@ -1,11 +1,10 @@
 :mod:`libaur.color`
 ===================
 
-.. |synopsis| replace:: Color definitions for :mod:`libaur`
 .. module:: libaur.color
-   :synopsis: |synopsis|
+   :synopsis: Color definitions for :mod:`libaur`
 
-|synopsis|
+Color escape sequences for shells.
 
 Classes
 -------

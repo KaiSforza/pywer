@@ -1,11 +1,12 @@
 :mod:`libaur.PKGBUILD`
 =======================
 
-.. |synopsis| replace:: Reads information from PKGBUILD scripts
 .. module:: libaur.PKGBUILD
-   :synopsis: |synopsis|
+   :synopsis: Reads information from PKGBUILD scripts
 
-|synopsis|
+A safe way to parse ``PKGBUILD`` scripts for some information. Not
+guaranteed to work with every ``PKGBUILD``, and it will probably break on
+corner cases.
 
 Functions
 ---------
@@ -15,15 +16,3 @@ Functions
   Parses data from a PKBUILD and returns a dictionary with the official
   variable fields listed. Does basic variable substitution, as well, with
   non-array bash variables
-
-Data
-----
-
-.. data:: VARIABLES
-
-  Contains a list of the official PKGBUILD variables
-
-.. data:: SEARCH
-
-  Contains a dictionary of regular expressions for each of the
-  :data:`VARIABLES` listed above.

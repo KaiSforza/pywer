@@ -1,11 +1,10 @@
 :mod:`libaur.repo`
 ==================
 
-.. |synopsis| replace:: Works with pacman repositories
 .. module:: libaur.repo
-   :synopsis: |synopsis|
+   :synopsis: Works with pacman repositories
 
-|synopsis|
+Used to view pacman repositories. Read-only.
 
 Functions
 ---------
@@ -42,15 +41,3 @@ Functions
 
   Used to imitate the output of ``pacman -Qm``, but can also list installed
   pacakges from a specific repo using the *ign_repos* list.
-
-
-Data
-----
-
-.. data:: local_variables
-
-  List of fields in ``desc`` file for local packages.
-
-.. data:: sync_variables
-
-  List of fields in ``desc`` and ``depends`` files for remote packages.

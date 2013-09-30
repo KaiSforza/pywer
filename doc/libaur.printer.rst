@@ -11,20 +11,6 @@ given by :mod:`libaur.aur`. This module is used by pywer_.
 
 .. _pywer: pywer.html
 
-Data
-----
-
-.. data:: CATEGORIES
-
-  A dictionary containing the definitions of the category numbers used in
-  the AUR.
-
-.. data:: FORMAT_STRINGS
-.. data:: INFO_FORMAT_STRINGS
-.. data:: INFO_INFO_FORMAT_STRINGS
-
-   The format string for different levels of information
-
 Functions
 ---------
 

@@ -60,6 +60,7 @@ cgit.
    libaur.repo
    libaur.error
    libaur.color
+   libaur.data
 
 Indices and tables
 ==================

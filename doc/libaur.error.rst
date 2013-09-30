@@ -1,11 +1,10 @@
 :mod:`libaur.error`
 ===================
 
-.. |synopsis| replace:: Error definitions for :mod:`libaur`
 .. module:: libaur.error
-   :synopsis: |synopsis|
+   :synopsis: Error definitions for :mod:`libaur`
 
-|synopsis|
+Simple error definitions
 
 Classes
 -------
