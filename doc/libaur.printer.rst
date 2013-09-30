@@ -28,7 +28,7 @@ Data
 Functions
 ---------
 
-.. function:: pretty_print_search(term, stype='search', baseurl=None, ood=True, be_verbose=0, color=False, format_str=None)
+.. function:: pretty_print_search(term, stype='search', baseurl=None, ood=True, be_verbose=0, color=False, format_str=None, dbpath='/var/lib/pacman')
 
    Print out the results from a search run by :class:`libaur.aur.SearchPkg`.
    *term* is the string to search for. *stype* is the same as

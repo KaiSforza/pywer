@@ -56,7 +56,7 @@ def _get_term_width():
 
 
 def pretty_print_search(term, stype='search', baseurl=None, ood=True,
-        be_verbose=0, color=False, format_str=None):
+        be_verbose=0, color=False, format_str=None, dbpath='/var/lib/pacman'):
     '''
     Print out search results
 
@@ -68,6 +68,7 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     be_verbose (int) -- Be verbose
     color (bool) -- Whether to use color
     format_str (str) -- A string for the format printing
+    dbpath (str) -- path to a pacman dbpath dbpath
     '''
     tw = _get_term_width()
     wrapper = textwrap.TextWrapper(initial_indent='    ',
@@ -77,6 +78,8 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
             req_type=stype).get_results()
     print_list = []
     sep = '\n'
+    inst_pkgs = repo.get_all_installed_pkgs(dbpath=dbpath)
+    inst_pkgs = set(inst_pkgs.keys())
     if format_str:
         sep = ''
         f = FORMAT_STRINGS.copy()
@@ -96,28 +99,35 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
         is_ood = this_pkg['OutOfDate']
         description = wrapper.fill(this_pkg['Description'])
 
+        if json_output[i]['Name'] in inst_pkgs and not format_str:
+            installed = ' {}[{}installed{}]{}'.format(
+                    _color.bold_blue, _color.bold_green, _color.bold_blue,
+                    _color.reset)
+        else:
+            installed = ''
+
         if be_verbose >= 0:
             if format_str:
                 print_list.append(fmt_replace.sub(lambda x:
                         str(this_pkg[f[x.group(1)]]), format_str))
             else:
                 if this_pkg['OutOfDate'] == 0:
-                    print_list.append('{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.\
+                    print_list.append('{4}aur/{7}{5}{0} {6}{1}{7} ({2}){8}\n{3}'.\
                             format(name, version, numvotes, description,
                             _color.bold_magenta, _color.bold,
-                            _color.bold_green, _color.reset))
+                            _color.bold_green, _color.reset, installed))
                 else:
                     if not ood:
                         continue
                     if color:
                         print_list.append(
-                                '{4}aur/{7}{5}{0} {6}{1}{7} ({2})\n{3}'.format(
+                                '{4}aur/{7}{5}{0} {6}{1}{7} ({2}){8}\n{3}'.format(
                                 name, version, numvotes, description,
                                 _color.bold_magenta, _color.bold,
-                                _color.bold_red, _color.reset))
+                                _color.bold_red, _color.reset, installed))
                     else:
-                        print_list.append('aur/{} {} <!> ({})\n{}'.format(
-                            name, version, numvotes, description))
+                        print_list.append('aur/{} {} <!> ({}){}\n{}'.format(
+                            name, version, numvotes, installed, description))
 
         else:
             print_list.append(name)

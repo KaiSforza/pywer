@@ -176,11 +176,11 @@ if __name__ == '__main__':
     if args.search and args.targ:
         ret = libaur.printer.pretty_print_search(args.targ, baseurl=_baseurl,
                 ood=SHOW_OOD, be_verbose=VERBOSE, color=USE_COLOR,
-                format_str=args.format)
+                format_str=args.format, dbpath=DBPATH)
     elif args.msearch and args.targ:
         ret = libaur.printer.pretty_print_search(args.targ, stype='msearch',
                 baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
-                color=USE_COLOR, format_str=args.format)
+                color=USE_COLOR, format_str=args.format, dbpath=DBPATH)
     elif args.info and args.targ:
         if args.info > 1:
             ret = libaur.printer.pretty_print_info(args.targ, baseurl=_baseurl,
