@@ -57,7 +57,8 @@ class SearchPkg(object):
         '''
         Returns: json formatted output
         '''
-        self.results = requests.get(self.baseurl + '/rpc.php', params=self.payload)
+        self.results = requests.get(
+                self.baseurl + '/rpc.php', params=self.payload)
         self.json_output = self.results.json()['results']
         return self.json_output
 
@@ -86,8 +87,9 @@ class GetPkgs(InfoPkg):
         num -- number of packages (generally generated from
                len(self.json_output)
         '''
-        self.stream = requests.get('{}{}'.format(self.baseurl,
-                self.json_output[num]['URLPath']), stream=True)
+        self.stream = requests.get(
+                '{}{}'.format(self.baseurl, self.json_output[num]['URLPath']),
+                stream=True)
 
     def get_tarfile(self, extpath, force=False):
         '''
@@ -153,7 +155,8 @@ try:
             '''get json result from a multiinfo request'''
             # Requires execution of __init_local__()
             self.__init_local()
-            self.all_pkg_info = InfoPkg(self.pkgnames, baseurl=self.baseurl).get_results()
+            self.all_pkg_info = InfoPkg(
+                    self.pkgnames, baseurl=self.baseurl).get_results()
 
         def list_unofficial_pkgs(self):
             '''list packages with 'foreign packages' in dict'''

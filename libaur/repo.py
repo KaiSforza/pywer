@@ -65,7 +65,7 @@ def get_all_installed_pkgs_info(dbpath='/var/lib/pacman'):
     pkgs = dict()
     for i in dirs:
         try:
-            with open('{}/{}/desc'.format(dbpath, i), 'r', encoding='utf8' ) as descfile:
+            with open('{}/{}/desc'.format(dbpath, i), 'r', encoding='utf8') as descfile:
                 desc = descfile.read()
             fullinfo = parse_descstring(desc, REPO_LOCAL_VARIABLES)
             pkgs[fullinfo['NAME'][0]] = fullinfo
@@ -77,8 +77,8 @@ def get_all_installed_pkgs_info(dbpath='/var/lib/pacman'):
 
 def get_remote_pkgs(dbpath='/var/lib/pacman', ignore=[]):
     dbpath = dbpath + '/sync'
-    database_list = [files for files in os.listdir(dbpath) if (re.search('\.db$',
-                     files) and files not in ignore)]
+    database_list = [files for files in os.listdir(dbpath) if (
+                     re.search('\.db$', files) and files not in ignore)]
     pkgs = dict()
     pattern = re.compile(r'(.+)-([^-]+-[^-]+)/desc$')
     for database in database_list:
@@ -98,8 +98,8 @@ def get_remote_pkgs_info(dbpath='/var/lib/pacman', tmploc='/tmp/pywer',
         ignore=[]):
     # Warning, this is really, really slow.
     dbpath = dbpath + '/sync'
-    database_list = [files for files in os.listdir(dbpath) if re.search('\.db$',
-                     files) and files not in ignore]
+    database_list = [files for files in os.listdir(dbpath) if re.search(
+                     '\.db$', files) and files not in ignore]
     pkgs = dict()
     with tempfile.TemporaryDirectory(dir=tmploc) as tmp:
         for database in database_list:

@@ -71,11 +71,14 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     dbpath (str) -- path to a pacman dbpath dbpath
     '''
     tw = _get_term_width()
-    wrapper = textwrap.TextWrapper(initial_indent='    ',
-            subsequent_indent='    ', break_on_hyphens=False, width=(tw - 4))
+    wrapper = textwrap.TextWrapper(
+            initial_indent='    ', subsequent_indent='    ',
+            break_on_hyphens=False, width=(tw - 4))
+
     _color = colorlib.Color(color)
-    json_output = aur.SearchPkg(term, baseurl=baseurl,
-            req_type=stype).get_results()
+    json_output = aur.SearchPkg(
+            term, baseurl=baseurl, req_type=stype).get_results()
+
     print_list = []
     sep = '\n'
     inst_pkgs = repo.get_all_installed_pkgs(dbpath=dbpath)
@@ -112,22 +115,25 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
                         str(this_pkg[f[x.group(1)]]), format_str))
             else:
                 if this_pkg['OutOfDate'] == 0:
-                    print_list.append('{4}aur/{7}{5}{0} {6}{1}{7} ({2}){8}\n{3}'.\
-                            format(name, version, numvotes, description,
-                            _color.bold_magenta, _color.bold,
-                            _color.bold_green, _color.reset, installed))
+                    print_list.append(
+                            '{4}aur/{7}{5}{0} {6}{1}{7} ({2}){8}\n{3}'.format(
+                                name, version, numvotes, description,
+                                _color.bold_magenta, _color.bold,
+                                _color.bold_green, _color.reset, installed))
                 else:
                     if not ood:
                         continue
                     if color:
                         print_list.append(
                                 '{4}aur/{7}{5}{0} {6}{1}{7} ({2}){8}\n{3}'.format(
-                                name, version, numvotes, description,
-                                _color.bold_magenta, _color.bold,
-                                _color.bold_red, _color.reset, installed))
+                                    name, version, numvotes, description,
+                                    _color.bold_magenta, _color.bold,
+                                    _color.bold_red, _color.reset, installed))
                     else:
-                        print_list.append('aur/{} {} <!> ({}){}\n{}'.format(
-                            name, version, numvotes, installed, description))
+                        print_list.append(
+                                'aur/{} {} <!> ({}){}\n{}'.format(
+                                    name, version, numvotes, installed,
+                                    description))
 
         else:
             print_list.append(name)
@@ -154,9 +160,9 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
     format_str (str) -- A string for the format printing
     '''
     tw = _get_term_width()
-    wrapper = textwrap.TextWrapper(initial_indent='',
-            subsequent_indent='                 ', break_on_hyphens=False,
-            width=(tw - 17))
+    wrapper = textwrap.TextWrapper(
+            initial_indent='', subsequent_indent='                 ',
+            break_on_hyphens=False, width=(tw - 17))
     def _get_from_dict(put, key, sep):
         try:
             info_dict[put] = sep.join(full_info[key])
@@ -190,7 +196,8 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
         info_dict = json_output[i].copy()
 
         if more_info:
-            link_to = '{}/packages/{}/{}/PKGBUILD'.format(baseurl,
+            link_to = '{}/packages/{}/{}/PKGBUILD'.format(
+                                baseurl,
                                 json_output[i]['Name'][:2],
                                 json_output[i]['Name'])
             pkgbuild = requests.get(link_to)
@@ -210,15 +217,16 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
 
         # Out of date or not, and since when
         if json_output[i]['OutOfDate'] == 0:
-            info_dict['Out Of Date'] = '{}{}{}'.format(_color.bold_green, 'No',
-                    _color.reset)
+            info_dict['Out Of Date'] = '{}{}{}'.format(
+                    _color.bold_green, 'No', _color.reset)
         else:
             if not ood:
                 continue
-            oodtime = time.ctime(json_output[i]['OutOfDate'] + time.timezone
-                    - tzdiff)
-            info_dict['Out Of Date'] = '{}{}{} (since {})'\
-                    .format(_color.bold_red, 'Yes', _color.reset, oodtime)
+            oodtime = time.ctime(
+                    json_output[i]['OutOfDate'] + time.timezone - tzdiff)
+            info_dict['Out Of Date'] = (
+                    '{}{}{} (since {})'.format(
+                        _color.bold_red, 'Yes', _color.reset, oodtime))
 
         # Format the date fields using 'time'
         for field in ['FirstSubmitted', 'LastModified']:
@@ -227,8 +235,8 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
             else:
                 pretty_field = 'Last Modified'
             sec_time = json_output[i][field]
-            info_dict[pretty_field] = time.ctime(json_output[i][field] +
-                    time.timezone - tzdiff)
+            info_dict[pretty_field] = time.ctime(
+                    json_output[i][field] + time.timezone - tzdiff)
 
         # If it's installed, add the [installed] flag to the name
         if json_output[i]['Name'] in inst_pkgs and not format_str:
@@ -237,12 +245,12 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
                     _color.reset)
         else:
             installed = ''
-        info_dict['Name'] = '{}{}{}{}'.format(_color.bold,
-                json_output[i]['Name'], _color.reset, installed)
+        info_dict['Name'] = '{}{}{}{}'.format(
+                _color.bold, json_output[i]['Name'], _color.reset, installed)
 
         # Get the easy, plain strings
-        info_dict['Version'] = '{}{}{}'.format(_color.bold_green,
-                json_output[i]['Version'], _color.reset)
+        info_dict['Version'] = '{}{}{}'.format(
+                _color.bold_green, json_output[i]['Version'], _color.reset)
 
         # Some simple strings we can get and wrap
         for field in ['URL', 'License', 'Description']:
@@ -254,12 +262,12 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
             info_dict['Maintainer'] = '(orphan)'
 
         # Color the repo name and URLs
-        info_dict['Repository'] = '{}{}{}'.format( _color.bold_magenta, 'aur',
-                _color.reset)
-        info_dict['URL'] = '{}{}{}'.format(_color.bold_blue,
-                json_output[i]['URL'], _color.reset)
-        info_dict['AUR Page'] = '{}{}/packages/{}{}'.format(_color.bold_blue,
-                baseurl, json_output[i]['Name'], _color.reset)
+        info_dict['Repository'] = '{}{}{}'.format(
+                _color.bold_magenta, 'aur', _color.reset)
+        info_dict['URL'] = '{}{}{}'.format(
+                _color.bold_blue, json_output[i]['URL'], _color.reset)
+        info_dict['AUR Page'] = '{}{}/packages/{}{}'.format(
+                _color.bold_blue, baseurl, json_output[i]['Name'], _color.reset)
         # Get the category name
         info_dict['Category'] = CATEGORIES[json_output[i]['CategoryID']]
         info_dict['Votes'] = json_output[i]['NumVotes']
@@ -282,17 +290,17 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
             for field in use_fields:
                 if info_dict[field]:
                     if field != 'Optional Deps':
-                        print_str += '{:<15}: {}\n'.format(field,
-                                wrapper.fill(str(info_dict[field])))
+                        print_str += '{:<15}: {}\n'.format(
+                                field, wrapper.fill(str(info_dict[field])))
                     else:
-                        print_str += '{:<15}: {}\n'.format(field,
-                                str(info_dict[field]))
+                        print_str += '{:<15}: {}\n'.format(
+                                field, str(info_dict[field]))
             print_list.append(print_str)
         else:
             info_dict['%'] = '%'
             fmt_replace = re.compile(r'%(' + '|'.join(f) + '){1}')
-            print_list.append(fmt_replace.sub(lambda x:
-                    str(info_dict[f[x.group(1)]]), format_str))
+            print_list.append(fmt_replace.sub(
+                    lambda x: str(info_dict[f[x.group(1)]]), format_str))
 
     print(sep.join(print_list))
     if len(print_list) < 1:
@@ -368,13 +376,12 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None,
         pkgver = _a.json_output[i]['Version']
         if path.exists('{}/{}'.format(dl_path, pkgname)) and not dl_force:
             raise errors.FileExists(
-                    '{}::{} {}/{} already exists. Use --force to overwrite'\
-                    .format(_color.bold_red, _color.reset,
-                            dl_path, pkgname))
+                    '{}::{} {}/{} already exists. Use --force to overwrite'.format(
+                        _color.bold_red, _color.reset,
+                        dl_path, pkgname))
         _a.get_stream(i)
         _a.get_tarfile(dl_path, force=dl_force)
         if dl_verbose >= 0:
             print('{2}::{4} {3}{0}{4} downloaded to {1}'.format(
-                pkgname, dl_path,
-                _color.bold_blue, _color.bold, _color.reset))
+                pkgname, dl_path, _color.bold_blue, _color.bold, _color.reset))
     return True

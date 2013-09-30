@@ -83,8 +83,8 @@ def parse_pkgbuild(path=None, full_str=None):
             for lines in match:
                 # If anything is started by a '#' but is not part of a VCS
                 # fragment, then remove it from the final product.
-                no_comments = re.sub('#(?!revision|branch|tag|commit).*$', '',
-                        lines)
+                no_comments = re.sub(
+                        '#(?!revision|branch|tag|commit).*$', '', lines)
                 # If the line still has something on it...
                 if len(no_comments) > 0:
                     # Split up the words in the middle parens for single-line
@@ -96,8 +96,8 @@ def parse_pkgbuild(path=None, full_str=None):
             pkg_dict[j] = newmatch
 
     # Use this to find bash variables that we can parse and replace
-    bash_vars = re.compile(r'\$\{?(' + '|'.join(pkg_dict.keys()) +
-            r')(?!\[[0-9]*\]){1}\}?')
+    bash_vars = re.compile(
+            r'\$\{?(' + '|'.join(pkg_dict.keys()) + r')(?!\[[0-9]*\]){1}\}?')
 
     # Now that we have gotten a finished product in pkg_dict, we need to do the
     # var substitution,
@@ -105,9 +105,8 @@ def parse_pkgbuild(path=None, full_str=None):
         for ind in range(len(pkg_dict[var])):
             # Replace the dictionary index at [var][ind] with the matched regex
             # group we got from bash_vars' first group.
-            pkg_dict[var][ind] = bash_vars.sub(lambda x:
-                    pkg_dict[x.group(1)][0],
-                    pkg_dict[var][ind])
+            pkg_dict[var][ind] = bash_vars.sub(
+                    lambda x: pkg_dict[x.group(1)][0], pkg_dict[var][ind])
 
     # Finally return the well mangled pkg_dict
     return pkg_dict

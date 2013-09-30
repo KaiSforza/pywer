@@ -54,7 +54,7 @@ if __name__ == '__main__':
     # Operations
     # TODO: Find some way to only allow a single operation
     parser.add_argument('targ',
-                        help='target to perform \'operation\' on',
+                        help="target to perform 'operation' on",
                         nargs='*', default=None, metavar='target')
     operations = parser.add_argument_group('Operations')
     operations.add_argument('-s', '--search',
@@ -90,7 +90,8 @@ if __name__ == '__main__':
                         metavar='file')
     options.add_argument('-V', '--version',
                         help='Print version',
-                        action='version', version='%(prog)s {}'.format(libaur.__version__))
+                        action='version',
+                        version='%(prog)s {}'.format(libaur.__version__))
     options.add_argument('-o', '--ignore-ood',
                         help='Ignore out of date packages',
                         action='store_true')
@@ -98,7 +99,7 @@ if __name__ == '__main__':
                         help='Do not ignore out of date packages',
                         action='store_true')
     options.add_argument('-c', '--color',
-                        help='Use color. One of \'always\', \'auto\' or \'never\'',
+                        help="Use color. One of 'always', 'auto' or 'never'",
                         metavar='when')
     options.add_argument('--ignorerepo',
                         help='Specify comma separated list of repos to ignore',
@@ -154,8 +155,9 @@ if __name__ == '__main__':
 
 
     if has_pyalpm:
-        arg_count = sum([args.search, args.msearch, args.info, args.download,
-                args.update])
+        arg_count = sum(
+                [args.search, args.msearch, args.info, args.download,
+                    args.update])
     else:
         arg_count = sum([args.search, args.msearch, args.info, args.download])
 
@@ -174,30 +176,32 @@ if __name__ == '__main__':
         _baseurl = config['AUR']['BaseUrl']
 
     if args.search and args.targ:
-        ret = libaur.printer.pretty_print_search(args.targ, baseurl=_baseurl,
-                ood=SHOW_OOD, be_verbose=VERBOSE, color=USE_COLOR,
-                format_str=args.format, dbpath=DBPATH)
-    elif args.msearch and args.targ:
-        ret = libaur.printer.pretty_print_search(args.targ, stype='msearch',
-                baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
+        ret = libaur.printer.pretty_print_search(
+                args.targ, baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
                 color=USE_COLOR, format_str=args.format, dbpath=DBPATH)
+    elif args.msearch and args.targ:
+        ret = libaur.printer.pretty_print_search(
+                args.targ, stype='msearch', baseurl=_baseurl, ood=SHOW_OOD,
+                be_verbose=VERBOSE, color=USE_COLOR, format_str=args.format,
+                dbpath=DBPATH)
     elif args.info and args.targ:
         if args.info > 1:
-            ret = libaur.printer.pretty_print_info(args.targ, baseurl=_baseurl,
-                    ood=SHOW_OOD, color=USE_COLOR, more_info=True,
-                    dbpath=DBPATH, format_str=args.format)
+            ret = libaur.printer.pretty_print_info(
+                    args.targ, baseurl=_baseurl, ood=SHOW_OOD, color=USE_COLOR,
+                    more_info=True, dbpath=DBPATH, format_str=args.format)
         else:
-            ret = libaur.printer.pretty_print_info(args.targ, baseurl=_baseurl,
-                    ood=SHOW_OOD, color=USE_COLOR, dbpath=DBPATH,
-                    format_str=args.format)
+            ret = libaur.printer.pretty_print_info(
+                    args.targ, baseurl=_baseurl, ood=SHOW_OOD, color=USE_COLOR,
+                    dbpath=DBPATH, format_str=args.format)
     elif args.download and args.targ:
         if args.target:
             dl_path = path.expanduser(args.target)
         else:
             dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
         dl_path = path.expandvars(dl_path)
-        ret = libaur.printer.download_pkgs(args.targ, dl_path, dl_verbose=VERBOSE,
-                baseurl=_baseurl, dl_force=FORCE, ood=SHOW_OOD, color=USE_COLOR)
+        ret = libaur.printer.download_pkgs(
+                args.targ, dl_path, dl_verbose=VERBOSE, baseurl=_baseurl,
+                dl_force=FORCE, ood=SHOW_OOD, color=USE_COLOR)
     elif has_pyalpm and args.update:
         if args.ignorerepo:
             repo_ignore = args.ignorerepo
@@ -205,13 +209,13 @@ if __name__ == '__main__':
             repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
 
         if not args.targ:
-            ret = libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
-                    baseurl=_baseurl, be_verbose=VERBOSE, dbpath=DBPATH,
-                    color=USE_COLOR)
+            ret = libaur.printer.pretty_print_updpkgs(
+                    other_repos=repo_ignore, baseurl=_baseurl,
+                    be_verbose=VERBOSE, dbpath=DBPATH, color=USE_COLOR)
         else:
-            ret = libaur.printer.pretty_print_updpkgs(other_repos=repo_ignore,
-                    baseurl=_baseurl, pkgs=args.targ, be_verbose=VERBOSE,
-                    dbpath=DBPATH, color=USE_COLOR)
+            ret = libaur.printer.pretty_print_updpkgs(
+                    other_repos=repo_ignore, baseurl=_baseurl, pkgs=args.targ,
+                    be_verbose=VERBOSE, dbpath=DBPATH, color=USE_COLOR)
     else:
         if VERBOSE >= 0:
             print('Invalid operation specified. (Use -h for help)')
