@@ -48,7 +48,8 @@ def _get_term_width():
     if not sys.stdout.isatty():
         return 2**32
     try:
-        a, termwidth = popen('stty size', 'r').read().split()
+        with popen('stty size', 'r') as stty:
+            a, termwidth = stty.read().split()
         termwidth = int(termwidth)
     except OSError:
         termwidth = 78
