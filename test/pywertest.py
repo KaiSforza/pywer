@@ -15,7 +15,7 @@ class PrinterBadInput(unittest.TestCase):
 
     def test_string_input_ppsi(self):
         '''pretty_print_simple_info should fail with string input as first arg'''
-        self.assertRaises(TypeError, printer.pretty_print_simple_info, 'foo')
+        self.assertRaises(TypeError, printer.pretty_print_info, 'foo')
 
     def test_string_input_ppu(self):
         '''pretty_print_updpkgs should fail with string input pkgs arg'''
