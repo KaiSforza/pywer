@@ -50,10 +50,31 @@ class PkgbuildTest(unittest.TestCase):
                 {'source':['git://foobar.git']}),
             ]
 
+    VAR_EXPN = [
+            ('''pkgname=foo
+                depends=(${pkgname}-git)\n''',
+                {'pkgname':['foo'], 'depends':['foo-git']}),
+            ('''pkgname=(foo bar)
+                depends=(${pkgname[1]}-git)\n''',
+                {'pkgname':['foo', 'bar'], 'depends':['bar-git']}),
+            ('''pkgname=foo
+                depends=(${pkgname} bar)\n''',
+                {'pkgname':['foo'], 'depends':['foo', 'bar']}),
+            ('''pkgname=foo
+                depends=($pkgname bar)\n''',
+                {'pkgname':['foo'], 'depends':['foo', 'bar']}),
+            ]
+
     def test_known_values(self):
         '''parse_pkgbuild should return the values listed above'''
         for pkgbuild, output in self.KNOWN_VALUES:
             # This is a default .Add it to the known output dictionary.
+            output['epoch'] = ['0']
+            self.assertDictEqual(P.parse_pkgbuild(full_str=pkgbuild), output)
+
+    def test_variable_expansion(self):
+        '''parse_pkgbuild should return the values with variables substituted'''
+        for pkgbuild, output in self.VAR_EXPN:
             output['epoch'] = ['0']
             self.assertDictEqual(P.parse_pkgbuild(full_str=pkgbuild), output)
 
