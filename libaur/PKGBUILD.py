@@ -97,7 +97,35 @@ def parse_pkgbuild(path=None, full_str=None):
 
     # Use this to find bash variables that we can parse and replace
     bash_vars = re.compile(
-            r'\$\{?(' + '|'.join(pkg_dict.keys()) + r')(?!\[[0-9]*\]){1}\}?')
+            r'''
+            \$(                             # Starts with a '$'
+            \{(''' + '|'.join(pkg_dict.keys()) +
+            r''')(\[[0-9]+\])?\}          # now there are two types: ones
+                                            # surrounded by '{}'...
+            |                               # or
+            (''' + '|'.join(pkg_dict.keys()) +
+            r'''(?!\[[0-9]+\])?'))          # those not surrounded by '{}'s.
+            ''', re.VERBOSE)
+    bash_index = re.compile(r'''(\S+)\[([0-9]+)\]''')
+
+    def _replace_vars(x, d):
+        '''
+        Replace variables. Does simple shell expansion of variables.
+
+        x -- regular expression match
+        d -- a dictionary of keys you want to use
+        '''
+        var = x.group(1).strip('{}')
+        ind = bash_index.search(var)
+
+        if ind:
+            index = int(ind.group(2))
+            var = ind.group(1)
+        else:
+            index = 0
+
+        replace = d[var.strip('{}')]
+        return replace[index]
 
     # Now that we have gotten a finished product in pkg_dict, we need to do the
     # var substitution,
@@ -106,7 +134,8 @@ def parse_pkgbuild(path=None, full_str=None):
             # Replace the dictionary index at [var][ind] with the matched regex
             # group we got from bash_vars' first group.
             pkg_dict[var][ind] = bash_vars.sub(
-                    lambda x: pkg_dict[x.group(1)][0], pkg_dict[var][ind])
+                    lambda x: _replace_vars(x, pkg_dict),
+                    pkg_dict[var][ind])
 
     # Finally return the well mangled pkg_dict
     return pkg_dict
