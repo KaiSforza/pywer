@@ -15,8 +15,8 @@ class PkgbuildTest(unittest.TestCase):
             ('''pkgname=('foobar' 'pacman')\n''',
                 {'pkgname':['foobar', 'pacman']}),
             # This one fails. Need better parsing for non-quoted strings
-            #('''pkgname=(foobar pacman)\n''',
-            #    {'pkgname':['foobar', 'pacman']}),
+            ('''pkgname=(foobar pacman)\n''',
+                {'pkgname':['foobar', 'pacman']}),
             ('''pkgver=123
                 456
              ''', {'pkgver':['123']}),
