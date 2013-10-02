@@ -110,7 +110,7 @@ try:
         This class is used for grabbing lists of updated packages from the AUR
         specified by 'baseurl'.
         '''
-        def __init__(self, other_repos=[], pkgs=[],
+        def __init__(self, other_repos=[], pkgs=[], ign_pkg=[],
                 baseurl='https://aur.archlinux.org', ood=True,
                 dbpath='/var/lib/pacman'):
             '''
@@ -124,6 +124,7 @@ try:
             self.baseurl = baseurl
             self.pkgs = pkgs
             self.other_repos = other_repos
+            self.ign_pkg = ign_pkg
             self.ign_dbs = [db + '.db' for db in other_repos]
             self.ood = ood
             self.dbpath = dbpath
@@ -187,6 +188,8 @@ try:
             # We want to go through each package dictionary returned by InfoPkg
             for pkginfo in self.all_pkg_info:
                 if not self.ood and pkginfo['OutOfDate'] == 0:
+                    continue
+                if pkginfo['Name'] in self.ign_pkg:
                     continue
                 # Get the pkgname and pkgver from each package
                 pkgname = pkginfo['Name']

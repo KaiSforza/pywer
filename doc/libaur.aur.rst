@@ -49,7 +49,7 @@ The Classes
 
   Download and extract the source tarball to *extpath*/pkgname.
 
-.. class:: UpdatedPkgs(other_repos=[], pkgs=[], baseurl='https://aur.archlinux.org', ood=True)
+.. class:: UpdatedPkgs(other_repos=[], pkgs=[], ign_pkg=[], baseurl='https://aur.archlinux.org', ood=True)
 
   A class for finding out of date packages installed on your system that are
   not in an official repository. The *other_repos* list can be used to tell
@@ -58,7 +58,9 @@ The Classes
   package or set of packages, use the *pkgs* list. As with the other
   classes, you can override the default AUR location with *baseurl*. Setting
   *ood* to ``False`` will cause out of date packages to be ignored when
-  looking for updates.
+  looking for updates. You can use the *ign_pkg* directive to pass a list of
+  packages to ignore when looking for updates. This will take effect in the
+  *get_upd_pkgs* method.
 
 .. method:: list_unofficial_pkgs()
 

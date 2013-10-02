@@ -122,6 +122,9 @@ if __name__ == '__main__':
     options.add_argument('--rsort',
                         help="Reverse sort results by 'key'",
                         metavar='key')
+    options.add_argument('--ignore',
+                        help="Ignore a package or comma separated list of packages",
+                        metavar='pkg')
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
@@ -161,6 +164,11 @@ if __name__ == '__main__':
         rev_sort = True
         term_sort = args.rsort
 
+    # Ignore parsing
+    ignore = []
+    if args.ignore:
+        ignore = args.ignore.split(',')
+
     VERBOSE = args.verbose - args.quiet
 
     if args.dbpath:
@@ -194,23 +202,24 @@ if __name__ == '__main__':
         ret = libaur.printer.pretty_print_search(
                 args.targ, baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
                 color=USE_COLOR, format_str=args.format, dbpath=DBPATH,
-                sort_as=term_sort, sort_rev=rev_sort)
+                sort_as=term_sort, sort_rev=rev_sort, ign=ignore)
     elif args.msearch and args.targ:
         ret = libaur.printer.pretty_print_search(
                 args.targ, stype='msearch', baseurl=_baseurl, ood=SHOW_OOD,
                 be_verbose=VERBOSE, color=USE_COLOR, format_str=args.format,
-                dbpath=DBPATH, sort_as=term_sort, sort_rev=rev_sort)
+                dbpath=DBPATH, sort_as=term_sort, sort_rev=rev_sort,
+                ign=ignore)
     elif args.info and args.targ:
         if args.info > 1:
             ret = libaur.printer.pretty_print_info(
                     args.targ, baseurl=_baseurl, ood=SHOW_OOD, color=USE_COLOR,
                     more_info=True, dbpath=DBPATH, format_str=args.format,
-                    sort_as=term_sort, sort_rev=rev_sort)
+                    sort_as=term_sort, sort_rev=rev_sort, ign=ignore)
         else:
             ret = libaur.printer.pretty_print_info(
                     args.targ, baseurl=_baseurl, ood=SHOW_OOD, color=USE_COLOR,
                     dbpath=DBPATH, format_str=args.format, sort_as=term_sort,
-                    sort_rev=rev_sort)
+                    sort_rev=rev_sort, ign=ignore)
     elif args.download and args.targ:
         if args.target:
             dl_path = path.expanduser(args.target)
@@ -219,7 +228,7 @@ if __name__ == '__main__':
         dl_path = path.expandvars(dl_path)
         ret = libaur.printer.download_pkgs(
                 args.targ, dl_path, dl_verbose=VERBOSE, baseurl=_baseurl,
-                dl_force=FORCE, ood=SHOW_OOD, color=USE_COLOR)
+                dl_force=FORCE, ood=SHOW_OOD, color=USE_COLOR, ign=ignore)
     elif has_pyalpm and args.update:
         if args.ignorerepo:
             repo_ignore = args.ignorerepo
@@ -229,11 +238,13 @@ if __name__ == '__main__':
         if not args.targ:
             ret = libaur.printer.pretty_print_updpkgs(
                     other_repos=repo_ignore, baseurl=_baseurl,
-                    be_verbose=VERBOSE, dbpath=DBPATH, color=USE_COLOR)
+                    be_verbose=VERBOSE, dbpath=DBPATH, color=USE_COLOR,
+                    ign=ignore)
         else:
             ret = libaur.printer.pretty_print_updpkgs(
                     other_repos=repo_ignore, baseurl=_baseurl, pkgs=args.targ,
-                    be_verbose=VERBOSE, dbpath=DBPATH, color=USE_COLOR)
+                    be_verbose=VERBOSE, dbpath=DBPATH, color=USE_COLOR,
+                    ign=ignore)
     else:
         if VERBOSE >= 0:
             print('Invalid operation specified. (Use -h for help)')

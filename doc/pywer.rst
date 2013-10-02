@@ -88,6 +88,9 @@ Options
     gathered from the AUR's json RPC interface (i.e. Name, Version,
     Maintainer, URL, LastModified)
 
+--ignore pkg
+    Ignore a package or a comma separated list of packages.
+
 Formats
 -------
 

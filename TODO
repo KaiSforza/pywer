@@ -25,7 +25,7 @@ pywer
   * --debug
   * DONE--force
   * DONE--format=
-  * --ignore=
+  * DONE--ignore=
   * DONE--ignorerepo[=]
   * --listdelim
   * DONE--no-ignore-ood

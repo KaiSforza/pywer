@@ -58,7 +58,7 @@ def _get_term_width():
 
 def pretty_print_search(term, stype='search', baseurl=None, ood=True,
         be_verbose=0, color=False, format_str=None, dbpath='/var/lib/pacman',
-        sort_as='Name', sort_rev=False):
+        sort_as='Name', sort_rev=False, ign=[]):
     '''
     Print out search results
 
@@ -73,6 +73,7 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     dbpath (str) -- path to a pacman dbpath dbpath
     sort_as (str) -- Which key to sort by
     sort_rev (str) -- Whether to sort reversed or not
+    ign (str) -- A list of packages to ignore
     '''
     tw = _get_term_width()
     wrapper = textwrap.TextWrapper(
@@ -95,6 +96,8 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
         f = FORMAT_STRINGS.copy()
         fmt_replace = re.compile(r'%(' + '|'.join(f) + '){1}')
     for i in range(len(search_list)):
+        if search_list[i]['Name'] in ign:
+            continue
         this_pkg = search_list[i].copy()
         if this_pkg['OutOfDate'] == 0:
             is_ood = ''
@@ -153,7 +156,7 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
 
 def pretty_print_info(packages, baseurl=None, ood=True, color=False,
         more_info=False, dbpath='/var/lib/pacman', format_str=None,
-        sort_as='Name', sort_rev=False):
+        sort_as='Name', sort_rev=False, ign=[]):
     '''
     Get some simple info from an AUR
 
@@ -168,6 +171,7 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
     format_str (str) -- A string for the format printing
     sort_as (str) -- Which key to sort by
     sort_rev (str) -- Whether to sort reversed or not
+    ign (str) -- A list of packages to ignore
     '''
     tw = _get_term_width()
     wrapper = textwrap.TextWrapper(
@@ -207,6 +211,8 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
     inst_pkgs = set(inst_pkgs.keys())
 
     for i in range(len(info_list)):
+        if info_list[i]['Name'] in ign:
+            continue
         info_dict = info_list[i].copy()
 
         if more_info:
@@ -325,7 +331,7 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
 
 
 def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
-        be_verbose=0, dbpath='/var/lib/pacman', color=False):
+        be_verbose=0, dbpath='/var/lib/pacman', color=False, ign=[]):
     '''
     Print a list of packages that need updating
 
@@ -341,7 +347,8 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
     _color = colorlib.Color(color)
     if not isinstance(pkgs, list):
         raise TypeError('Must be a list')
-    a = aur.UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl, dbpath=dbpath)
+    a = aur.UpdatedPkgs(other_repos, pkgs=pkgs, baseurl=baseurl, dbpath=dbpath,
+            ign_pkg=ign)
     upddict = a.get_upd_pkgs()
     if len(upddict.keys()) < 1:
         return False
@@ -364,7 +371,7 @@ def pretty_print_updpkgs(other_repos=[], baseurl=None, pkgs=[],
 
 
 def download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None,
-        dl_force=False, ood=True, color=False):
+        dl_force=False, ood=True, color=False, ign=[]):
     '''
     Download packages
 
@@ -383,6 +390,8 @@ def download_pkgs(list_of_pkgs, dl_path, dl_verbose=0, baseurl=None,
 
     for i in range(len(_a.json_output)):
         pkgname = _a.json_output[i]['Name']
+        if pkgname in ign:
+            continue
         if not _a.json_output[i]['OutOfDate'] == 0 and not ood:
             if dl_verbose >= 0:
                 print(':: no results for {}'.format(pkgname))
