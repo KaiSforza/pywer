@@ -96,14 +96,15 @@ def parse_pkgbuild(path=None, full_str=None):
             pkg_dict[j] = newmatch
 
     # Use this to find bash variables that we can parse and replace
+    pkg_vars = pkg_dict.keys()
     bash_vars = re.compile(
             r'''
             \$(                             # Starts with a '$'
-            \{(''' + r'|'.join(pkg_dict.keys()) + r''')
+            \{(''' + r'|'.join(pkg_vars) + r''')
             (\[[0-9]+\])?\}                 # now there are two types: ones
                                             # surrounded by '{}'...
             |                               # or
-            (''' + r'|'.join(pkg_dict.keys()) + r''')
+            (''' + r'|'.join(pkg_vars) + r''')
             (?!\[[0-9]+\])?)                # those not surrounded by '{}'s.
             ''', re.VERBOSE)
     bash_index = re.compile(r'''(\S+)\[([0-9]+)\]''')
