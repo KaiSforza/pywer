@@ -29,7 +29,7 @@ A simple python AUR library
 ''' + __full_license__
 
 __title__ = 'libaur'
-__version__ = '0.10.1'
+__version__ = '0.10.3'
 __author__ = 'William Giokas'
 __authoremail__ = '1007380@gmail.com'
 __license__ = 'MIT'
