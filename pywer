@@ -116,6 +116,12 @@ if __name__ == '__main__':
     options.add_argument('--format',
                         help='Print with specified format (see docs)',
                         metavar='fmt', default=None)
+    options.add_argument('--sort',
+                        help="Sort results by 'key'",
+                        metavar='key')
+    options.add_argument('--rsort',
+                        help="Reverse sort results by 'key'",
+                        metavar='key')
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
@@ -145,6 +151,15 @@ if __name__ == '__main__':
         USE_COLOR = 1
     else:
         USE_COLOR = 0
+
+    # Sorting by what, and if reverse or not
+    term_sort = 'Name'
+    rev_sort = False
+    if args.sort:
+        term_sort = args.sort
+    elif args.rsort:
+        rev_sort = True
+        term_sort = args.rsort
 
     VERBOSE = args.verbose - args.quiet
 
@@ -178,21 +193,24 @@ if __name__ == '__main__':
     if args.search and args.targ:
         ret = libaur.printer.pretty_print_search(
                 args.targ, baseurl=_baseurl, ood=SHOW_OOD, be_verbose=VERBOSE,
-                color=USE_COLOR, format_str=args.format, dbpath=DBPATH)
+                color=USE_COLOR, format_str=args.format, dbpath=DBPATH,
+                sort_as=term_sort, sort_rev=rev_sort)
     elif args.msearch and args.targ:
         ret = libaur.printer.pretty_print_search(
                 args.targ, stype='msearch', baseurl=_baseurl, ood=SHOW_OOD,
                 be_verbose=VERBOSE, color=USE_COLOR, format_str=args.format,
-                dbpath=DBPATH)
+                dbpath=DBPATH, sort_as=term_sort, sort_rev=rev_sort)
     elif args.info and args.targ:
         if args.info > 1:
             ret = libaur.printer.pretty_print_info(
                     args.targ, baseurl=_baseurl, ood=SHOW_OOD, color=USE_COLOR,
-                    more_info=True, dbpath=DBPATH, format_str=args.format)
+                    more_info=True, dbpath=DBPATH, format_str=args.format,
+                    sort_as=term_sort, sort_rev=rev_sort)
         else:
             ret = libaur.printer.pretty_print_info(
                     args.targ, baseurl=_baseurl, ood=SHOW_OOD, color=USE_COLOR,
-                    dbpath=DBPATH, format_str=args.format)
+                    dbpath=DBPATH, format_str=args.format, sort_as=term_sort,
+                    sort_rev=rev_sort)
     elif args.download and args.targ:
         if args.target:
             dl_path = path.expanduser(args.target)

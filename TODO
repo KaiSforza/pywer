@@ -30,8 +30,8 @@ pywer
   * --listdelim
   * DONE--no-ignore-ood
   * DONE--ignore-ood
-  * --sort
-  * --rsort
+  * DONE--sort
+  * DONE--rsort
   * --from-pkgbuild
   * DONE--quiet
   * DONE--target

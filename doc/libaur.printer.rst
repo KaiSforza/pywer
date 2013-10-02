@@ -14,13 +14,13 @@ given by :mod:`libaur.aur`. This module is used by pywer_.
 Functions
 ---------
 
-.. function:: pretty_print_search(term, stype='search', baseurl=None, ood=True, be_verbose=0, color=False, format_str=None, dbpath='/var/lib/pacman')
+.. function:: pretty_print_search(term, stype='search', baseurl=None, ood=True, be_verbose=0, color=False, format_str=None, dbpath='/var/lib/pacman', sort_as='Name', sort_rev=False)
 
    Print out the results from a search run by :class:`libaur.aur.SearchPkg`.
    *term* is the string to search for. *stype* is the same as
    :class:`libaur.aur.SearchPkg`'s req_type.
 
-.. function:: pretty_print_info(package, baseurl=None, ood = True, color=False, more_info=False, format_str=None)
+.. function:: pretty_print_info(package, baseurl=None, ood = True, color=False, more_info=False, format_str=None, sort_as='Name', sort_rev=False)
 
    Prints the results of :class:`libaur.aur.InfoPkg` in human readable
    output, showing all fields but `ID`. *package* is a list of pacakges to

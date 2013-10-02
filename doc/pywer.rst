@@ -83,6 +83,11 @@ Options
 --format fmt
     Specify a format string to print out. See below for a list of keys.
 
+--sort=key, --rsort=key
+    Sort (or reverse sort) the results by *key*, where *key* is any field
+    gathered from the AUR's json RPC interface (i.e. Name, Version,
+    Maintainer, URL, LastModified)
+
 Formats
 -------
 
