@@ -99,12 +99,12 @@ def parse_pkgbuild(path=None, full_str=None):
     bash_vars = re.compile(
             r'''
             \$(                             # Starts with a '$'
-            \{(''' + '|'.join(pkg_dict.keys()) +
-            r''')(\[[0-9]+\])?\}          # now there are two types: ones
+            \{(''' + r'|'.join(pkg_dict.keys()) + r''')
+            (\[[0-9]+\])?\}                 # now there are two types: ones
                                             # surrounded by '{}'...
             |                               # or
-            (''' + '|'.join(pkg_dict.keys()) +
-            r'''(?!\[[0-9]+\])?'))          # those not surrounded by '{}'s.
+            (''' + r'|'.join(pkg_dict.keys()) + r''')
+            (?!\[[0-9]+\])?)                # those not surrounded by '{}'s.
             ''', re.VERBOSE)
     bash_index = re.compile(r'''(\S+)\[([0-9]+)\]''')
 
