@@ -63,6 +63,9 @@ class PkgbuildTest(unittest.TestCase):
             ('''pkgname=foo
                 depends=($pkgname bar)\n''',
                 {'pkgname':['foo'], 'depends':['foo', 'bar']}),
+            ('''pkgname=foo
+                depends=($pkgname[1] bar)\n''',
+                {'pkgname':['foo'], 'depends':['foo[1]', 'bar']}),
             ]
 
     def test_known_values(self):
