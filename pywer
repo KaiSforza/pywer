@@ -76,6 +76,10 @@ if __name__ == '__main__':
 
     # Options
     options = parser.add_argument_group('Options')
+    options.add_argument('-V', '--version',
+                        help='Print version',
+                        action='version',
+                        version='%(prog)s {}'.format(libaur.__version__))
     options.add_argument('-q', '--quiet',
                         help='Be quieter',
                         action='count', default=0)
@@ -85,34 +89,12 @@ if __name__ == '__main__':
     options.add_argument('-f', '--force',
                         help='overwrite existing files while downloading',
                         action='store_true', default=False)
-    options.add_argument('--config',
-                        help='Specify an alternate config',
-                        metavar='file')
-    options.add_argument('-V', '--version',
-                        help='Print version',
-                        action='version',
-                        version='%(prog)s {}'.format(libaur.__version__))
-    options.add_argument('-o', '--ignore-ood',
-                        help='Ignore out of date packages',
-                        action='store_true')
-    options.add_argument('--no-ignore-ood',
-                        help='Do not ignore out of date packages',
-                        action='store_true')
     options.add_argument('-c', '--color',
                         help="Use color. One of 'always', 'auto' or 'never'",
                         metavar='when')
-    options.add_argument('--ignorerepo',
-                        help='Specify comma separated list of repos to ignore',
-                        metavar='repo', nargs='+')
-    options.add_argument('-t', '--target',
-                        help='Specify an alternate download location',
-                        metavar='dir')
-    options.add_argument('--baseurl',
-                        help='Set a custom baseurl to an AUR',
-                        metavar='url')
-    options.add_argument('--dbpath',
-                        help='Set a custom dbpath (for -u)',
-                        metavar='path')
+    options.add_argument('--ignore',
+                        help="Ignore a package or comma separated list of packages",
+                        metavar='pkg')
     options.add_argument('--format',
                         help='Print with specified format (see docs)',
                         metavar='fmt', default=None)
@@ -122,9 +104,30 @@ if __name__ == '__main__':
     options.add_argument('--rsort',
                         help="Reverse sort results by 'key'",
                         metavar='key')
-    options.add_argument('--ignore',
-                        help="Ignore a package or comma separated list of packages",
-                        metavar='pkg')
+    options.add_argument('--config',
+                        help='Specify an alternate config',
+                        metavar='file')
+
+    # Mostly things that are rarely used and are set in the config file.
+    confflags = parser.add_argument_group('Configuration')
+    confflags.add_argument('--baseurl',
+                        help='Set a custom baseurl to an AUR',
+                        metavar='url')
+    confflags.add_argument('--dbpath',
+                        help='Set a custom dbpath (for -u)',
+                        metavar='path')
+    confflags.add_argument('--ignorerepo',
+                        help='Specify comma separated list of repos to ignore',
+                        metavar='repo', nargs='+')
+    confflags.add_argument('-o', '--ignore-ood',
+                        help='Ignore out of date packages',
+                        action='store_true')
+    confflags.add_argument('--no-ignore-ood',
+                        help='Do not ignore out of date packages',
+                        action='store_true')
+    confflags.add_argument('-t', '--target',
+                        help='Specify an alternate download location',
+                        metavar='dir')
     args = parser.parse_args()
 
     config = configparser.ConfigParser()
@@ -132,6 +135,7 @@ if __name__ == '__main__':
         use_config = args.config
     else:
         use_config = xdg.BaseDirectory.xdg_config_home + '/pywer/pywer.ini'
+
     config.read(use_config)
 
 
