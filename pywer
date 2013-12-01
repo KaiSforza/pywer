@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 
 import libaur.printer
 import libaur.errors as error
+import libaur.aur
 import libaur
 import configparser
 import xdg.BaseDirectory
@@ -189,7 +190,11 @@ if __name__ == '__main__':
         arg_count = sum([args.search, args.msearch, args.info, args.download])
 
     if arg_count != 1:
-        if not args.info == 2:
+        if args.info == 2:
+            pass
+        elif sum([args.download, args.update]) == 2:
+            pass
+        else:
             raise error.ArgError('Invalid operation')
     # We cannot have certain args run without a target
     elif (args.search or args.msearch or args.info) and not args.targ:
@@ -224,6 +229,38 @@ if __name__ == '__main__':
                     args.targ, baseurl=_baseurl, ood=SHOW_OOD, color=USE_COLOR,
                     dbpath=DBPATH, format_str=args.format, sort_as=term_sort,
                     sort_rev=rev_sort, ign=ignore)
+
+    elif args.download and args.update:
+        if args.target:
+            dl_path = path.expanduser(args.target)
+        else:
+            dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
+        dl_path = path.expandvars(dl_path)
+
+        # Get ignored repos for updpkgs
+        if args.ignorerepo:
+            repo_ignore = args.ignorerepo
+        else:
+            repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
+
+        updated_pkgs = libaur.aur.UpdatedPkgs(repo_ignore, baseurl=_baseurl,
+                dbpath=DBPATH, ign_pkg=ignore)
+
+        # Get a list of installed packages
+        upddict = updated_pkgs.get_upd_pkgs()
+        pkgs = list(upddict.keys())
+        if len(pkgs) < 1:
+            exit(1)
+
+        # Create the full list including the ones specified on the command line
+        updpkgs = args.targ.copy()
+        # Extend it with the updated packages
+        updpkgs.extend(pkgs)
+
+        ret = libaur.printer.download_pkgs(
+                updpkgs, dl_path, dl_verbose=VERBOSE, baseurl=_baseurl,
+                dl_force=FORCE, ood=SHOW_OOD, color=USE_COLOR, ign=ignore)
+
     elif args.download and args.targ:
         if args.target:
             dl_path = path.expanduser(args.target)
