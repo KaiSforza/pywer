@@ -40,7 +40,8 @@ from . import repo
 class SearchPkg(object):
     '''Search for packages on the AUR.'''
     def __init__(self, term, req_type = 'search',
-            baseurl='https://aur.archlinux.org'):
+                 baseurl='https://aur.archlinux.org',
+                 vurls=True):
         '''
         Arguments:
         term -- tearm to search for (str)
@@ -50,15 +51,17 @@ class SearchPkg(object):
                     rpc interface for an AUR site.
         '''
         self.baseurl = baseurl
+        self.vurls = vurls
         self.payload = { 'type': req_type }
         self.payload['arg'] = term
+        self.rpc = {False: '/rpc.php', True: '/rpc'}
 
     def get_results(self):
         '''
         Returns: json formatted output
         '''
         self.results = requests.get(
-                self.baseurl + '/rpc.php', params=self.payload)
+                self.baseurl + self.rpc[self.vurls], params=self.payload)
         self.json_output = self.results.json()['results']
         return self.json_output
 
