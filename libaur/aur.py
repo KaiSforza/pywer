@@ -28,18 +28,14 @@ DEALINGS IN THE SOFTWARE.
 '''
 
 import requests
-import json
-import re
-import distutils.version
 import tarfile
-from os import path
 
-from .__init__ import __version__
 from . import repo
+
 
 class SearchPkg(object):
     '''Search for packages on the AUR.'''
-    def __init__(self, term, req_type = 'search',
+    def __init__(self, term, req_type='search',
                  baseurl='https://aur.archlinux.org',
                  vurls=True):
         '''
@@ -52,7 +48,7 @@ class SearchPkg(object):
         '''
         self.baseurl = baseurl
         self.vurls = vurls
-        self.payload = { 'type': req_type }
+        self.payload = {'type': req_type}
         self.payload['arg'] = term
         self.rpc = {False: '/rpc.php', True: '/rpc'}
 
@@ -61,13 +57,14 @@ class SearchPkg(object):
         Returns: json formatted output
         '''
         self.results = requests.get(
-                self.baseurl + self.rpc[self.vurls], params=self.payload)
+            self.baseurl + self.rpc[self.vurls], params=self.payload)
         self.json_output = self.results.json()['results']
         return self.json_output
 
+
 class InfoPkg(SearchPkg):
     '''For introspcting packages on the AUR. Can work on multiple packages.'''
-    def __init__(self, pkgs, baseurl='https://aur.archlinux.org'):
+    def __init__(self, pkgs, baseurl='https://aur.archlinux.org', vurls=True):
         '''
         Arguments:
         pkgs -- A list of packages to get info for (list)
@@ -75,12 +72,15 @@ class InfoPkg(SearchPkg):
                     rpc interface for an AUR site.
         '''
         self.baseurl = baseurl
+        self.vurls = vurls
+        self.rpc = {False: '/rpc.php', True: '/rpc'}
         if not isinstance(pkgs, list):
             raise TypeError('Must take a list')
         self.req_type = 'multiinfo'
-        self.payload = { 'type': self.req_type }
+        self.payload = {'type': self.req_type}
         for each in pkgs:
             self.payload['arg[{}]'.format(each)] = each
+
 
 class GetPkgs(InfoPkg):
     '''Downloads and transparently extracts to a specified path.'''
@@ -91,8 +91,8 @@ class GetPkgs(InfoPkg):
                len(self.json_output)
         '''
         self.stream = requests.get(
-                '{}{}'.format(self.baseurl, self.json_output[num]['URLPath']),
-                stream=True)
+            '{}{}'.format(self.baseurl, self.json_output[num]['URLPath']),
+            stream=True)
 
     def get_tarfile(self, extpath, force=False):
         '''
@@ -108,30 +108,34 @@ class GetPkgs(InfoPkg):
 
 try:
     from pyalpm import vercmp
+
     class UpdatedPkgs():
         '''
         This class is used for grabbing lists of updated packages from the AUR
         specified by 'baseurl'.
         '''
         def __init__(self, other_repos=[], pkgs=[], ign_pkg=[],
-                baseurl='https://aur.archlinux.org', ood=True,
-                dbpath='/var/lib/pacman'):
+                     baseurl='https://aur.archlinux.org', ood=True,
+                     dbpath='/var/lib/pacman', vurls=True):
             '''
             Arguments:
-            other_repos=[] -- A list of repos to ignore becuase they contain AUR
-                        packages. Defaults to an empty list, ignoring no repos.
+            other_repos=[] -- A list of repos to ignore becuase they contain
+                              AUR packages. Defaults to an empty list,
+                              ignoring no repos.
             pkgs=[] -- A list of packages to operate on
             baseurl='https://aur.archlinux.org' -- A string pointing to the
                         rpc interface for an AUR site.
             '''
             self.baseurl = baseurl
+            self.vurls = vurls
+            self.rpc = {False: '/rpc.php', True: '/rpc'}
             self.pkgs = pkgs
             self.other_repos = other_repos
             self.ign_pkg = ign_pkg
             self.ign_dbs = [db + '.db' for db in other_repos]
             self.ood = ood
             self.dbpath = dbpath
-            self.local_pkgs = repo.get_all_installed_pkgs(dbpath = self.dbpath)
+            self.local_pkgs = repo.get_all_installed_pkgs(dbpath=self.dbpath)
 
         def __init_local(self):
             '''
@@ -160,12 +164,12 @@ try:
             # Requires execution of __init_local__()
             self.__init_local()
             self.all_pkg_info = InfoPkg(
-                    self.pkgnames, baseurl=self.baseurl).get_results()
+                self.pkgnames, baseurl=self.baseurl).get_results()
 
         def list_unofficial_pkgs(self):
             '''list packages with 'foreign packages' in dict'''
             unof = repo.get_unofficial_pkgs(dbpath=self.dbpath,
-                    ign_repos=self.ign_dbs)
+                                            ign_repos=self.ign_dbs)
             return unof
 
         def list_given_pkgs_and_ver(self):
@@ -183,7 +187,7 @@ try:
             '''
             Get updated packages
             Returns: dictionary:
-                {pkgname:{'oldver':installedversion, 'newver':aur_version}, ...}
+                {pkgname:{'oldver':installedversion, 'newver':aur_version},...}
             '''
             self.__init_remote()
             # Initialize the return list
@@ -196,12 +200,13 @@ try:
                     continue
                 # Get the pkgname and pkgver from each package
                 pkgname = pkginfo['Name']
-                pkgver  = pkginfo['Version']
+                pkgver = pkginfo['Version']
                 # Use pkgname to get the same info from the aurpkgs dictionary
                 local_version = self.aurpkgs[pkgname]
                 comp = vercmp(pkgver, local_version)
                 if comp > 0.0:
-                    add_to_update[pkgname] = {'oldver':local_version, 'newver':pkgver}
+                    add_to_update[pkgname] = {'oldver': local_version,
+                                              'newver': pkgver}
             return add_to_update
 
 except ImportError:

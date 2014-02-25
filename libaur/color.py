@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 import sys
 
+
 class Color():
     def color_on(self):
         self.black = "\x1b[30m"
