@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
-__doc__ = '''
+#!/usr/bin/env python
+from __future__ import print_function
+'''
 pywer AUR downloader
 
 MIT/X Consortium License
@@ -29,12 +30,16 @@ import libaur.printer
 import libaur.errors as error
 import libaur.aur
 import libaur
-import configparser
 import xdg.BaseDirectory
 import argparse
 import re
 from os import path
 from sys import exit
+try:
+    import configparser
+except:
+    import ConfigParser as configparser
+
 try:
     import pyalpm
     has_pyalpm = True
@@ -145,7 +150,7 @@ if __name__ == '__main__':
                 .format(use_config)
         raise error.ConfigMissing(message)
 
-    SHOW_OOD = not config['Repos'].getboolean('IgnoreOOD')
+    SHOW_OOD = not config.getboolean('Repos', 'IgnoreOOD')
 
     if args.color == 'always':
         USE_COLOR = 2
@@ -153,9 +158,9 @@ if __name__ == '__main__':
         USE_COLOR = 1
     elif args.color == 'never':
         USE_COLOR = 0
-    elif config['Printing']['Color'] == 'always':
+    elif config.get('Printing', 'Color') == 'always':
         USE_COLOR = 2
-    elif config['Printing']['Color'] == 'auto':
+    elif config.get('Printing', 'Color') == 'auto':
         USE_COLOR = 1
     else:
         USE_COLOR = 0
@@ -179,33 +184,42 @@ if __name__ == '__main__':
     if args.dbpath:
         DBPATH=args.dbpath
     else:
-        DBPATH=config['pacman']['DBPath']
+        DBPATH=config.get('pacman', 'DBPath')
 
 
     if has_pyalpm:
         arg_count = sum(
                 [args.search, args.msearch, args.info, args.download,
                     args.update])
+        if arg_count != 1:
+            if args.info == 2:
+                pass
+            elif sum([args.download, args.update]) == 2:
+                pass
+            else:
+                raise error.ArgError('Invalid operation')
+        # We cannot have certain args run without a target
+        elif (args.search or args.msearch or args.info) and not args.targ:
+            raise error.ArgError('Invalid opertaion')
+
     else:
         arg_count = sum([args.search, args.msearch, args.info, args.download])
+        if arg_count != 1:
+            if args.info == 2:
+                pass
+            else:
+                raise error.ArgError('Invalid operation')
+        # We cannot have certain args run without a target
+        elif (args.search or args.msearch or args.info) and not args.targ:
+            raise error.ArgError('Invalid opertaion')
 
-    if arg_count != 1:
-        if args.info == 2:
-            pass
-        elif sum([args.download, args.update]) == 2:
-            pass
-        else:
-            raise error.ArgError('Invalid operation')
-    # We cannot have certain args run without a target
-    elif (args.search or args.msearch or args.info) and not args.targ:
-        raise error.ArgError('Invalid opertaion')
 
     FORCE=args.force
 
     if args.baseurl:
         _baseurl = args.baseurl
     else:
-        _baseurl = config['AUR']['BaseUrl']
+        _baseurl = config.get('AUR', 'BaseUrl')
 
     if args.search and args.targ:
         ret = libaur.printer.pretty_print_search(
@@ -234,14 +248,14 @@ if __name__ == '__main__':
         if args.target:
             dl_path = path.expanduser(args.target)
         else:
-            dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
+            dl_path = path.expanduser(config.get('Filesystem', 'DownloadPath'))
         dl_path = path.expandvars(dl_path)
 
         # Get ignored repos for updpkgs
         if args.ignorerepo:
             repo_ignore = args.ignorerepo
         else:
-            repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
+            repo_ignore = re.split(',', config.get('Repos', 'IgnoreRepo'))
 
         updated_pkgs = libaur.aur.UpdatedPkgs(repo_ignore, baseurl=_baseurl,
                 dbpath=DBPATH, ign_pkg=ignore)
@@ -265,7 +279,7 @@ if __name__ == '__main__':
         if args.target:
             dl_path = path.expanduser(args.target)
         else:
-            dl_path = path.expanduser(config['Filesystem']['DownloadPath'])
+            dl_path = path.expanduser(config.get('Filesystem', 'DownloadPath'))
         dl_path = path.expandvars(dl_path)
         ret = libaur.printer.download_pkgs(
                 args.targ, dl_path, dl_verbose=VERBOSE, baseurl=_baseurl,
@@ -274,7 +288,7 @@ if __name__ == '__main__':
         if args.ignorerepo:
             repo_ignore = args.ignorerepo
         else:
-            repo_ignore = re.split(',', config['Repos']['IgnoreRepo'])
+            repo_ignore = re.split(',', config.get('Repos', 'IgnoreRepo'))
 
         if not args.targ:
             ret = libaur.printer.pretty_print_updpkgs(

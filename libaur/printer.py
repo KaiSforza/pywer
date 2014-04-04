@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 '''
 Used to print information from libaur.aur
 
@@ -89,17 +91,17 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     sep = '\n'
     inst_pkgs = repo.get_all_installed_pkgs(dbpath=dbpath)
     inst_pkgs = set(inst_pkgs.keys())
-    search_list = json_output.copy()
+    search_list = json_output
     search_list.sort(key=lambda k: k[sort_as], reverse=sort_rev)
 
     if format_str:
         sep = ''
-        f = FORMAT_STRINGS.copy()
+        f = FORMAT_STRINGS
         fmt_replace = re.compile(r'%(' + '|'.join(f) + '){1}')
     for i in range(len(search_list)):
         if search_list[i]['Name'] in ign:
             continue
-        this_pkg = search_list[i].copy()
+        this_pkg = search_list[i]
         name = this_pkg['Name']
         version = this_pkg['Version']
         numvotes = this_pkg['NumVotes']
@@ -178,7 +180,7 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
             info_dict[put] = ''
 
     print_list = []
-    f = FORMAT_STRINGS.copy()
+    f = FORMAT_STRINGS
     f.update(INFO_FORMAT_STRINGS)
     if more_info:
         f.update(INFO_INFO_FORMAT_STRINGS)
@@ -192,7 +194,7 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
 
     json_output = aur.InfoPkg(packages,
                               baseurl=baseurl).get_results()
-    info_list = json_output.copy()
+    info_list = json_output
     info_list.sort(key=lambda k: k[sort_as], reverse=sort_rev)
 
     localized = time.localtime()
@@ -207,7 +209,7 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
     for i in range(len(info_list)):
         if info_list[i]['Name'] in ign:
             continue
-        info_dict = info_list[i].copy()
+        info_dict = info_list[i]
 
         if more_info:
             link_to = '{}/packages/{}/{}/PKGBUILD'.format(
