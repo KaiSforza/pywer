@@ -147,16 +147,16 @@ try:
             else:
                 # Create a list [('pkgname', 'pkgver')]
                 self.aurpkgs = self.list_unofficial_pkgs()
-            # Initialize a list that will be converted to a dictionary later
-            #self.aurpkgs = {}
+            #  Initialize a list that will be converted to a dictionary later
+            # self.aurpkgs = {}
             # Create a dictionary from the aurlist list::
-            #       {'pkg1':'ver1',
-            #        'pkg2':'ver2',
-            #        ...}
-            #for pkg, ver in self.aurlist:
+            #      {'pkg1':'ver1',
+            #       'pkg2':'ver2',
+            #       ...}
+            # for pkg, ver in self.aurlist:
             #    self.aurpkgs[pkg] = ver
             # Create a list of package names from the keys in the aurpkgs dict:
-            #       ['pkg1', 'pkg2', ...]
+            #      ['pkg1', 'pkg2', ...]
             self.pkgnames = list(self.aurpkgs.keys())
 
         def __init_remote(self):

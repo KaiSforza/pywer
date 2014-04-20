@@ -7,14 +7,17 @@ import unittest
 import libaur.printer as printer
 import libaur.aur as aur
 
+
 class PrinterBadInput(unittest.TestCase):
     def test_string_input_dlpkgs(self):
         '''download_pkg should fail with string input as first arg'''
         self.assertRaises(TypeError, printer.download_pkgs, 'foo',
-                '/tmp/.pywer_test_suite')
+                          '/tmp/.pywer_test_suite')
 
     def test_string_input_ppsi(self):
-        '''pretty_print_simple_info should fail with string input as first arg'''
+        '''
+        pretty_print_simple_info should fail with string input as first arg
+        '''
         self.assertRaises(TypeError, printer.pretty_print_info, 'foo')
 
     def test_string_input_ppu(self):
