@@ -1,6 +1,8 @@
 pywer
 =====
 
+.. image:: http://kaictl.net:8090/job/pywer/badge/icon
+
 A simple library based AUR helper
 
 (pronounced like 'pyre')
