@@ -41,7 +41,7 @@ import re
 import textwrap
 
 
-def _get_term_width():
+def __get_term_width():
     '''
     Determine terminal width using os.popen, fall back on 78. If we're not
     dealing with a tty, then don't word wrap (nothing should be longer than
@@ -78,7 +78,7 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     sort_rev (str) -- Whether to sort reversed or not
     ign (str) -- A list of packages to ignore
     '''
-    tw = _get_term_width()
+    tw = __get_term_width()
     wrapper = textwrap.TextWrapper(
         initial_indent='    ', subsequent_indent='    ',
         break_on_hyphens=False, width=(tw - 4))
@@ -172,7 +172,7 @@ def pretty_print_info(packages, baseurl=None, ood=True, color=False,
     sort_rev (str) -- Whether to sort reversed or not
     ign (str) -- A list of packages to ignore
     '''
-    tw = _get_term_width()
+    tw = __get_term_width()
     wrapper = textwrap.TextWrapper(
         initial_indent='', subsequent_indent='                 ',
         break_on_hyphens=False, width=(tw - 17))
