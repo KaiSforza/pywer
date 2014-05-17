@@ -94,6 +94,15 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     search_list = json_output
     search_list.sort(key=lambda k: k[sort_as], reverse=sort_rev)
 
+    # Print format strings and dicts
+    plain_format = '{mag}aur/{reset}{bold}{nam} {OOD} ({votes}){inst}\n{desc}'
+    # Color for OOD notification
+    OOD_COLOR = {True: _color.bold_green,
+                 False: _color.bold_red}
+    # If we're using color, this is an empty string
+    COLCHAR = {True: '',
+               False: ' <!>'}
+
     if format_str:
         sep = ''
         f = FORMAT_STRINGS
@@ -101,45 +110,40 @@ def pretty_print_search(term, stype='search', baseurl=None, ood=True,
     for i in range(len(search_list)):
         if search_list[i]['Name'] in ign:
             continue
-        this_pkg = search_list[i]
-        name = this_pkg['Name']
-        version = this_pkg['Version']
-        numvotes = this_pkg['NumVotes']
-        description = wrapper.fill(this_pkg['Description'])
-
-        if search_list[i]['Name'] in inst_pkgs and not format_str:
-            installed = ' {}[{}installed{}]{}'.format(
-                _color.bold_blue, _color.bold_green, _color.bold_blue,
-                _color.reset)
-        else:
-            installed = ''
-
         if be_verbose >= 0:
-            if format_str:
-                print_list.append(fmt_replace.sub(lambda x:
-                                  str(this_pkg[f[x.group(1)]]), format_str))
-            else:
-                if this_pkg['OutOfDate'] == 0:
-                    print_list.append(
-                        '{4}aur/{7}{5}{0} {6}{1}{7} ({2}){8}\n{3}'.format(
-                            name, version, numvotes, description,
-                            _color.bold_magenta, _color.bold,
-                            _color.bold_green, _color.reset, installed))
-                else:
-                    if not ood:
-                        continue
-                    if color:
-                        print_list.append(
-                            '{4}aur/{7}{5}{0} {6}{1}{7} ({2}){8}\n{3}'.format(
-                                name, version, numvotes, description,
-                                _color.bold_magenta, _color.bold,
-                                _color.bold_red, _color.reset, installed))
-                    else:
-                        print_list.append(
-                            'aur/{} {} <!> ({}){}\n{}'.format(
-                                name, version, numvotes, installed,
-                                description))
+            this_pkg = search_list[i]
+            name = this_pkg['Name']
+            version = this_pkg['Version']
+            numvotes = this_pkg['NumVotes']
+            description = wrapper.fill(this_pkg['Description'])
 
+            if search_list[i]['Name'] in inst_pkgs and not format_str:
+                installed = ' {}[{}installed{}]{}'.format(
+                    _color.bold_blue, _color.bold_green, _color.bold_blue,
+                    _color.reset)
+            else:
+                installed = ''
+
+                if format_str:
+                    print_list.append(
+                        fmt_replace.sub(
+                            lambda x: str(this_pkg[f[x.group(1)]]),
+                            format_str))
+
+                else:
+                    _outofdate = '{color}{ver}{reset}{nocol}'.format(
+                        ver=version,
+                        color=OOD_COLOR[(this_pkg['OutOfDate'] == 0)],
+                        reset=_color.reset,
+                        nocol=COLCHAR[color])
+
+                    print_list.append(
+                        plain_format.format(
+                            nam=name, OOD=_outofdate, votes=numvotes,
+                            inst=installed, desc=description,
+                            mag=_color.bold_magenta,
+                            bold=_color.bold,
+                            reset=_color.reset))
         else:
             print_list.append(name)
     print(sep.join(print_list))
